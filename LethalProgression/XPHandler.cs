@@ -201,7 +201,7 @@ namespace LethalProgression
             // Quota multiplier
             int quotaMult = LethalProgress.configQuotaMult.Value;
             int quotaVal = quota * quotaMult;
-            req += (int)(req * (quota * quotaVal));
+            req += (int)(req * (quotaVal / 100f));
 
             LethalProgress.Log.LogInfo($"{playerCount} players, {quota} quotas, {initialXPCost} initial cost, {personValue} person value, {quotaVal} quota value, {req} total cost.");
             return req;
