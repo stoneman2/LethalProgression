@@ -222,17 +222,6 @@ namespace LethalProgression.GUI
 
             minusOne.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
             minusOne.GetComponent<Button>().onClick.AddListener(delegate { RemoveSkillPoint(skill, 1); });
-
-            if (!StartOfRound.Instance.inShipPhase)
-            {
-                plusFive.SetActive(false);
-                plusTwo.SetActive(false);
-                plusOne.SetActive(false);
-
-                minusFive.SetActive(false);
-                minusTwo.SetActive(false);
-                minusOne.SetActive(false);
-            }
         }
 
         public void AddSkillPoint(LethalProgression.Skills.Skill skill, int amt)

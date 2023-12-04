@@ -41,10 +41,6 @@ namespace LethalProgression
             xpBuild += xpInstance.GetXP() + "\n";
             xpBuild += xpInstance.GetProfit() + "\n";
             System.IO.File.WriteAllText(path, xpBuild);
-
-            xpInstance.xpLevel.Value = 0;
-            xpInstance.xpPoints.Value = 0;
-            xpInstance.profit.Value = 0;
         }
 
         [HarmonyPostfix]
@@ -71,7 +67,6 @@ namespace LethalProgression
 
             System.IO.File.WriteAllText(path, xpBuild);
 
-            LethalProgress.Log.LogInfo("Resetting XP values.");
             xpInstance.SetSkillPoints(0);
             xpInstance.xpLevel.Value = 0;
             xpInstance.xpPoints.Value = 0;
@@ -101,8 +96,6 @@ namespace LethalProgression
             xpBuild += "0\n";
 
             System.IO.File.WriteAllText(path, xpBuild);
-
-            LethalProgress.Log.LogInfo("Resetting XP values.");
         }
 
         [HarmonyPostfix]
@@ -126,9 +119,9 @@ namespace LethalProgression
 
         internal static void ClientConnectInitializer(Scene sceneName, LoadSceneMode sceneEnum)
         {
+
             if (sceneName.name == "SampleSceneRelay")
             {
-                // This initializes the XP instance.
                 GameObject xpHandlerObj = new GameObject("XPHandler");
                 xpHandlerObj.AddComponent<NetworkObject>();
                 xpInstance = xpHandlerObj.AddComponent<XP>();
