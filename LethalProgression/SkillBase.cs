@@ -28,7 +28,7 @@ namespace LethalProgression.Skills
             { "Battery Life", new Skill("Battery Life",
                 "You brought better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.", "BAT", "Battery Life",
                 UpgradeType.Battery, 1, 99999, 5f) },
-            { "Hand Slot", new Skill("Hand Slot", "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one more slot! 20 per slot.)", "HND", "Hand Slots",
+            { "Hand Slot", new Skill("Hand Slot", "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one more slot! 10 per slot.)", "HND", "Hand Slots",
                 UpgradeType.HandSlot, 1, 30, 10f, LethalProgression.Skills.HandSlots.HandSlotsUpdate) },
             { "Scrap Value", new Skill("Team Scrap Value", "The company favors you, giving you better deals when bartering.", "VAL", "Team Loot Value",
                 UpgradeType.Value, 1, 99999, 1f, LethalProgression.XPHandler.xpInstance.TeamLootValueUpdate, true) },

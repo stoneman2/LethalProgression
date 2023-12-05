@@ -67,10 +67,16 @@ namespace LethalProgression
 
             System.IO.File.WriteAllText(path, xpBuild);
 
-            xpInstance.SetSkillPoints(0);
+            foreach (KeyValuePair<string, LethalProgression.Skills.Skill> skill in LethalProgression.XPHandler.xpInstance.skillList.skills)
+            {
+                skill.Value.SetLevel(0);
+            }
+
+            xpInstance.SetSkillPoints(5);
             xpInstance.xpLevel.Value = 0;
             xpInstance.xpPoints.Value = 0;
             xpInstance.profit.Value = 0;
+            xpInstance.teamLootValue.Value = 0;
         }
 
         [HarmonyPostfix]
@@ -102,7 +108,7 @@ namespace LethalProgression
         [HarmonyPatch(typeof(GameNetworkManager), "Disconnect")]
         private static void DisconnectXPHandler()
         {
-            int lootLevel = LethalProgression.XPHandler.xpInstance.skillList.skills["Loot Value"].GetLevel();
+            int lootLevel = LethalProgression.XPHandler.xpInstance.skillList.skills["Scrap Value"].GetLevel();
             xpInstance.TeamLootValueUpdate(-lootLevel, 0);
         }
 
