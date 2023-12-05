@@ -13,7 +13,7 @@ namespace LethalProgression.Skills
         [HarmonyPatch(typeof(RoundManager), "SpawnScrapInLevel")]
         private static void AddLootValue()
         {
-            RoundManager.Instance.scrapValueMultiplier += (LethalProgression.XPHandler.xpInstance.teamLootValue.Value / 100);
+            RoundManager.Instance.scrapValueMultiplier = RoundManager.Instance.scrapValueMultiplier + (LethalProgression.XPHandler.xpInstance.teamLootValue.Value / 100);
         }
     }
 }

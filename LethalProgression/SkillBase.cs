@@ -120,11 +120,10 @@ namespace LethalProgression.Skills
 
         public void AddLevel(int level)
         {
-            int oldLevel = _level;
             _level += level;
             int newLevel = _level;
 
-            _callback?.Invoke(oldLevel, newLevel);
+            _callback?.Invoke(level, newLevel);
         }
     }
 }

@@ -11,9 +11,8 @@ namespace LethalProgression.Skills
         public static void StaminaUpdate(int oldStamina, int newStamina)
         {
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
-
-            localPlayer.sprintTime += (newStamina * 0.05f);
-            LethalProgress.Log.LogInfo("Stamina upgraded! New level: " + localPlayer.sprintTime);
+            localPlayer.sprintTime += (oldStamina * 0.05f);
+            LethalProgress.Log.LogInfo($"{oldStamina} old stamina, {newStamina} new stamina, {localPlayer.sprintTime} updated stamina");
         }
     }
 }
