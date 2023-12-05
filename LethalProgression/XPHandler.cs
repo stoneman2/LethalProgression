@@ -307,14 +307,14 @@ namespace LethalProgression
         /////////////////////////////////////////////////
         public void TeamLootValueUpdate(int oldValue, int newValue)
         {
-            int updatedValue = newValue - oldValue;
-            TeamLootValueUpdate_ServerRpc(updatedValue);
+            TeamLootValueUpdate_ServerRpc(oldValue);
         }
 
         [ServerRpc(RequireOwnership = false)]
         public void TeamLootValueUpdate_ServerRpc(int updatedValue)
         {
             LethalProgression.XPHandler.xpInstance.teamLootValue.Value += updatedValue;
+            LethalProgress.Log.LogInfo($"Team loot value updated by {updatedValue}.");
         }
 
         /////////////////////////////////////////////////

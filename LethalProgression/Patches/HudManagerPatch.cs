@@ -41,14 +41,14 @@ namespace LethalProgression.Patches
         //}
 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(RoundManager), "CollectNewScrapForThisRound")]
-        private static void GiveXPForScrap(GrabbableObject scrapObject)
+        [HarmonyPatch(typeof(HUDManager), "AddNewScrapFoundToDisplay")]
+        private static void GiveXPForScrap(GrabbableObject GObject)
         {
             if (!GameNetworkManager.Instance.isHostingGame)
                 return;
 
             // Now we got the loot list that's about to be displayed, we add XP for each one that gets shown.
-            int scrapCost = scrapObject.scrapValue;
+            int scrapCost = GObject.scrapValue;
 
             // Give XP for the amount of money this scrap costs.
             LethalProgression.XPHandler.xpInstance.AddXPServerRPC(scrapCost);
