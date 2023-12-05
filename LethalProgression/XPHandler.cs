@@ -10,6 +10,9 @@ using System.IO;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using GameNetcodeStuff;
+using LethalProgression.Config;
+using LethalProgression.Skills;
+using LethalProgression.GUI;
 
 namespace LethalProgression
 {
@@ -67,7 +70,7 @@ namespace LethalProgression
 
             System.IO.File.WriteAllText(path, xpBuild);
 
-            foreach (KeyValuePair<string, LethalProgression.Skills.Skill> skill in LethalProgression.XPHandler.xpInstance.skillList.skills)
+            foreach (KeyValuePair<UpgradeType, LethalProgression.Skills.Skill> skill in LethalProgression.XPHandler.xpInstance.skillList.skills)
             {
                 skill.Value.SetLevel(0);
             }
@@ -108,7 +111,7 @@ namespace LethalProgression
         [HarmonyPatch(typeof(GameNetworkManager), "Disconnect")]
         private static void DisconnectXPHandler()
         {
-            int lootLevel = LethalProgression.XPHandler.xpInstance.skillList.skills["Scrap Value"].GetLevel();
+            int lootLevel = xpInstance.skillList.skills[UpgradeType.HandSlot].GetLevel();
             xpInstance.TeamLootValueUpdate(-lootLevel, 0);
         }
 
@@ -120,7 +123,7 @@ namespace LethalProgression
             {
                 return;
             }
-            LethalProgression.XPHandler.xpInstance.xpReq.Value = LethalProgression.XPHandler.xpInstance.GetXPRequirement();
+            xpInstance.xpReq.Value = xpInstance.GetXPRequirement();
         }
 
         internal static void ClientConnectInitializer(Scene sceneName, LoadSceneMode sceneEnum)
@@ -131,7 +134,7 @@ namespace LethalProgression
                 GameObject xpHandlerObj = new GameObject("XPHandler");
                 xpHandlerObj.AddComponent<NetworkObject>();
                 xpInstance = xpHandlerObj.AddComponent<XP>();
-                LethalProgress.Log.LogInfo("Initialized XPHandler.");
+                LethalPlugin.Log.LogInfo("Initialized XPHandler.");
             }
         }
     }
@@ -171,20 +174,23 @@ namespace LethalProgression
 
                 string[] lines = System.IO.File.ReadAllLines(path);
 
-                LethalProgress.Log.LogError("Loading XP!");
+                LethalPlugin.Log.LogError("Loading XP!");
                 xpLevel.Value = int.Parse(lines[0]);
                 xpPoints.Value = int.Parse(lines[1]);
                 profit.Value = int.Parse(lines[2]);
                 xpReq.Value = GetXPRequirement();
 
-                LethalProgress.Log.LogInfo(GetXPRequirement().ToString());
+                LethalPlugin.Log.LogInfo(GetXPRequirement().ToString());
             }
 
             // For now: Give 1 skillpoint per level.
             skillPoints = xpLevel.Value + 5;
 
-            skillList = new LethalProgression.Skills.SkillList();
-            guiObj = new LethalProgression.GUI.SkillsGUI();
+            skillList = new SkillList();
+            skillList.InitializeSkills();
+
+            guiObj = new SkillsGUI();
+
 
             teamLootValue.OnValueChanged += guiObj.TeamLootHudUpdate;
 
@@ -198,18 +204,23 @@ namespace LethalProgression
             int playerCount = StartOfRound.Instance.connectedPlayersAmount;
             int quota = TimeOfDay.Instance.timesFulfilledQuota;
 
-            int initialXPCost = LethalProgress.configXPMin.Value;
+            int initialXPCost = SkillConfig.configXPMin.Value;
 
-            int personScale = LethalProgress.configPersonScale.Value;
+            int personScale = SkillConfig.configPersonScale.Value;
             int personValue = playerCount * personScale;
             int req = initialXPCost + personValue;
 
             // Quota multiplier
-            int quotaMult = LethalProgress.configQuotaMult.Value;
+            int quotaMult = SkillConfig.configQuotaMult.Value;
             int quotaVal = quota * quotaMult;
             req += (int)(req * (quotaVal / 100f));
 
-            LethalProgress.Log.LogInfo($"{playerCount} players, {quota} quotas, {initialXPCost} initial cost, {personValue} person value, {quotaVal} quota value, {req} total cost.");
+            if (req > SkillConfig.configXPMax.Value)
+            {
+                req = SkillConfig.configXPMax.Value;
+            }
+
+            LethalPlugin.Log.LogInfo($"{playerCount} players, {quota} quotas, {initialXPCost} initial cost, {personValue} person value, {quotaVal} quota value, {req} total cost.");
             return req;
         }
 
@@ -320,7 +331,7 @@ namespace LethalProgression
         public void TeamLootValueUpdate_ServerRpc(int updatedValue)
         {
             LethalProgression.XPHandler.xpInstance.teamLootValue.Value += updatedValue;
-            LethalProgress.Log.LogInfo($"Team loot value updated by {updatedValue}.");
+            LethalPlugin.Log.LogInfo($"Team loot value updated by {updatedValue}.");
         }
 
         /////////////////////////////////////////////////
@@ -329,18 +340,20 @@ namespace LethalProgression
 
         // When updates.
         [ServerRpc(RequireOwnership = false)]
-        public void ServerHandSlots_ServerRpc(int newSlots, ulong playerID)
+        public void ServerHandSlots_ServerRpc(ulong playerID, int newSlots)
         {
-            SetPlayerHandslots_ClientRpc(newSlots, playerID);
+            if (LethalPlugin.ReservedSlots)
+                return;
+            SetPlayerHandslots_ClientRpc(playerID, newSlots);
         }
 
         [ClientRpc]
-        public void SetPlayerHandslots_ClientRpc(int newSlots, ulong playerID)
+        public void SetPlayerHandslots_ClientRpc(ulong playerID, int newSlots)
         {
-            SetHandSlot(newSlots, playerID);
+            SetHandSlot(playerID, newSlots);
         }
 
-        public void SetHandSlot(int newSlots, ulong playerID)
+        public void SetHandSlot(ulong playerID, int newSlots)
         {
             foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
             {
@@ -352,6 +365,7 @@ namespace LethalProgression
                     {
                         player.ItemSlots[i] = objects[i];
                     }
+                    LethalPlugin.Log.LogInfo($"Player {playerID} has {player.ItemSlots.Length} slots after setting.");
                     break;
                 }
             }
@@ -361,14 +375,18 @@ namespace LethalProgression
         [ServerRpc(RequireOwnership = false)]
         public void GetEveryoneHandSlots_ServerRpc()
         {
+            if (LethalPlugin.ReservedSlots)
+                return;
+
             Dictionary<ulong, int> handSlotDict = new Dictionary<ulong, int>();
 
             // Compile a list of all players and their handslots.
-            for (int i = 0; i < StartOfRound.Instance.allPlayerScripts.Length; i++)
+            foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
             {
-                PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[i];
+                if (!player.gameObject.activeSelf)
+                    continue;
                 ulong playerID = player.playerClientId;
-                int handSlots = (int)LethalProgression.XPHandler.xpInstance.skillList.skills["Hand Slot"].GetTrueValue();
+                int handSlots = (int)skillList.skills[UpgradeType.HandSlot].GetTrueValue();
                 SendEveryoneHandSlots_ClientRpc(playerID, handSlots);
             }
         }
@@ -376,7 +394,7 @@ namespace LethalProgression
         [ClientRpc]
         public void SendEveryoneHandSlots_ClientRpc(ulong playerID, int handSlots)
         {
-            SetHandSlot(handSlots, playerID);
+            SetHandSlot(playerID, handSlots);
         }
     }
 }

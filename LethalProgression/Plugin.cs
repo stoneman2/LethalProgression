@@ -11,29 +11,34 @@ using BepInEx.Logging;
 using System.Reflection;
 using System.IO;
 using UnityEngine.SceneManagement;
+using BepInEx.Bootstrap;
+using LethalProgression.GUI;
+using LethalProgression.Skills;
+using LethalProgression.Patches;
+using LethalProgression.Config;
 
 namespace LethalProgression
 {
-    [BepInPlugin("Stoneman.LethalProgression", "Lethal Progression", "1.0.2")]
-    internal class LethalProgress : BaseUnityPlugin
+    [BepInPlugin("Stoneman.LethalProgression", "Lethal Progression", "1.1.0")]
+    internal class LethalPlugin : BaseUnityPlugin
     {
         private const string modGUID = "Stoneman.LethalProgression";
         private const string modName = "Lethal Progression";
-        private const string modVersion = "1.0.2";
+        private const string modVersion = "1.1.0";
         private const string modAuthor = "Stoneman";
 
         // Make a public AssetBundle
         public static AssetBundle skillBundle;
 
         internal static ManualLogSource Log;
+        internal static bool ReservedSlots;
 
-        internal static ConfigEntry<int> configPersonScale;
-        internal static ConfigEntry<int> configQuotaMult;
-        internal static ConfigEntry<int> configXPMin;
-        internal static ConfigEntry<int> configXPMax;
+        public static LethalPlugin Instance { get; private set; }
 
         private void Awake()
         {
+            Instance = this;
+
             var harmony = new Harmony(modGUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
@@ -42,6 +47,14 @@ namespace LethalProgression
             Log = Logger;
 
             Log.LogInfo("Lethal Progression loaded.");
+
+            foreach (var plugin in Chainloader.PluginInfos)
+            {
+                if (plugin.Value.Metadata.GUID.IndexOf("ReservedItem") >= 0)
+                {
+                    ReservedSlots = true;
+                }
+            }
 
             // Network patcher!
             var types = Assembly.GetExecutingAssembly().GetTypes();
@@ -60,14 +73,16 @@ namespace LethalProgression
 
             SceneManager.sceneLoaded += LethalProgression.XPHandler.ClientConnectInitializer;
 
-            // Config binders
-            configPersonScale = Config.Bind("General", "Person Multiplier", 35, "How much does XP cost to level up go up per person?");
+            SkillConfig.InitConfig();
+        }
 
-            configQuotaMult = Config.Bind("General", "Quota Multiplier", 30, "How much more XP does it cost to level up go up per quota? (Percent)");
-
-            configXPMin = Config.Bind("General", "XP Minimum", 40, "Minimum XP to level up.");
-
-            configXPMax = Config.Bind("General", "XP Maximum", 750, "Maximum XP to level up.");
+        public void BindConfig<T>(ref ConfigEntry<T> config, string section, string key, T defaultValue, string description = "")
+        {
+            config = Config.Bind(section,
+                key,
+                defaultValue,
+                description
+            );
         }
     }
 }

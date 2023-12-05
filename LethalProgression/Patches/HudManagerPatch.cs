@@ -58,7 +58,7 @@ namespace LethalProgression.Patches
         private static void GiveXPForKill(EnemyAI __instance)
         {
             string enemyType = __instance.enemyType.ToString();
-            LethalProgress.Log.LogInfo("Enemy type: " + enemyType);
+            LethalPlugin.Log.LogInfo("Enemy type: " + enemyType);
             // Give XP for the amount of money this scrap costs.
             int enemyReward = 30;
             if (_enemyReward.ContainsKey(enemyType))
@@ -111,7 +111,7 @@ namespace LethalProgression.Patches
 
         public static void MakeLevelUp()
         {
-            levelText = GameObject.Instantiate(LethalProgress.skillBundle.LoadAsset<GameObject>("LevelUp"));
+            levelText = GameObject.Instantiate(LethalPlugin.skillBundle.LoadAsset<GameObject>("LevelUp"));
 
             levelText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Level Up! Spend your skill points. You have " + LethalProgression.XPHandler.xpInstance.GetSkillPoints() + ".";
 

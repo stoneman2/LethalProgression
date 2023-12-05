@@ -11,8 +11,12 @@ namespace LethalProgression.Skills
 {
     internal class HandSlots
     {
-        public static void HandSlotsUpdate(int oldHandSlots, int newHandSlots)
+        public static int currentPlayerSlots;
+        public static void HandSlotsUpdate(int updateValue, int newValue)
         {
+            if (LethalPlugin.ReservedSlots)
+                return;
+
             // Credit to Mike for this code! https://github.com/MikeS-MS/MikesTweaks/
 
             GameObject inventory = GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD/Inventory");
@@ -26,17 +30,17 @@ namespace LethalProgression.Skills
                 Object.Destroy(child.gameObject);
             }
 
-            int skillPercent = (int)LethalProgression.XPHandler.xpInstance.skillList.skills["Hand Slot"].GetTrueValue();
-            int skillAmount = (int)Math.Floor((double)(skillPercent / 100));
+            int skillPercent = (int)LethalProgression.XPHandler.xpInstance.skillList.skills[UpgradeType.HandSlot].GetTrueValue();
+            int slotsToAdd = (int)Math.Floor((double)(skillPercent / 100));
 
             // Prepare the arrays
-            Image[] ItemSlotIconFrames = new Image[4 + skillAmount];
+            Image[] ItemSlotIconFrames = new Image[4 + slotsToAdd];
             ItemSlotIconFrames[0] = HUDManager.Instance.itemSlotIconFrames[0];
             ItemSlotIconFrames[1] = HUDManager.Instance.itemSlotIconFrames[1];
             ItemSlotIconFrames[2] = HUDManager.Instance.itemSlotIconFrames[2];
             ItemSlotIconFrames[3] = HUDManager.Instance.itemSlotIconFrames[3];
 
-            Image[] ItemSlotIcons = new Image[4 + skillAmount];
+            Image[] ItemSlotIcons = new Image[4 + slotsToAdd];
             ItemSlotIcons[0] = HUDManager.Instance.itemSlotIcons[0];
             ItemSlotIcons[1] = HUDManager.Instance.itemSlotIcons[1];
             ItemSlotIcons[2] = HUDManager.Instance.itemSlotIcons[2];
@@ -46,10 +50,13 @@ namespace LethalProgression.Skills
             GameObject CurrentSlot = Slot4;
 
             // Spawn more UI slots.
-            for (int i = 0; i < skillAmount; i++)
+            for (int i = 0; i < slotsToAdd; i++)
             {
                 GameObject NewSlot = Object.Instantiate(Slot4);
+
+                // This might break if someone else makes slots with these names in their mod..
                 NewSlot.name = $"Slot{3 + (i + 1)}";
+
                 NewSlot.transform.SetParent(inventory.transform);
 
                 // Change locations.
@@ -70,7 +77,7 @@ namespace LethalProgression.Skills
 
             // Tell the server we've updated our hand slots.
             ulong playerID = GameNetworkManager.Instance.localPlayerController.playerClientId;
-            LethalProgression.XPHandler.xpInstance.ServerHandSlots_ServerRpc(skillAmount, playerID);
+            LethalProgression.XPHandler.xpInstance.ServerHandSlots_ServerRpc(playerID, slotsToAdd);
         }
     }
 }

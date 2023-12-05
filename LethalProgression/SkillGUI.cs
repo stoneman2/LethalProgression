@@ -9,6 +9,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using LethalProgression.Patches;
 
 namespace LethalProgression.GUI
 {
@@ -19,13 +20,13 @@ namespace LethalProgression.GUI
         [HarmonyPatch(typeof(QuickMenuManager), "Update")]
         private static void SkillMenuUpdate(QuickMenuManager __instance)
         {
-            if (!LethalProgression.XPHandler.xpInstance.guiObj.mainPanel)
+            if (!XPHandler.xpInstance.guiObj.mainPanel)
                 return;
 
             // If the menu is open, activate mainPanel.
-            if (LethalProgression.XPHandler.xpInstance.guiObj.isMenuOpen)
+            if (XPHandler.xpInstance.guiObj.isMenuOpen)
             {
-                LethalProgression.XPHandler.xpInstance.guiObj.mainPanel.SetActive(true);
+                XPHandler.xpInstance.guiObj.mainPanel.SetActive(true);
                 GameObject mainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
                 mainButtons.SetActive(false);
 
@@ -36,7 +37,7 @@ namespace LethalProgression.GUI
             }
             else
             {
-                LethalProgression.XPHandler.xpInstance.guiObj.mainPanel.SetActive(false);
+                XPHandler.xpInstance.guiObj.mainPanel.SetActive(false);
             }
         }
         [HarmonyPostfix]
@@ -44,16 +45,16 @@ namespace LethalProgression.GUI
         private static void SkillMenuClose(QuickMenuManager __instance)
         {
             // This runs when someone presses esc in our menu
-            LethalProgression.XPHandler.xpInstance.guiObj.isMenuOpen = false;
+            XPHandler.xpInstance.guiObj.isMenuOpen = false;
         }
 
         private static void RealTimeUpdateInfo()
         {
-            GameObject tempObj = LethalProgression.XPHandler.xpInstance.guiObj.mainPanel.transform.GetChild(2).gameObject;
+            GameObject tempObj = XPHandler.xpInstance.guiObj.mainPanel.transform.GetChild(2).gameObject;
             tempObj = tempObj.transform.GetChild(1).gameObject;
 
             TextMeshProUGUI points = tempObj.GetComponent<TextMeshProUGUI>();
-            points.text = LethalProgression.XPHandler.xpInstance.GetSkillPoints().ToString();
+            points.text = XPHandler.xpInstance.GetSkillPoints().ToString();
         }
     }
     internal class SkillsGUI
@@ -81,12 +82,13 @@ namespace LethalProgression.GUI
 
         public void CreateSkillMenu()
         {
-            mainPanel = GameObject.Instantiate(LethalProgress.skillBundle.LoadAsset<GameObject>("SkillMenu"));
+            mainPanel = GameObject.Instantiate(LethalPlugin.skillBundle.LoadAsset<GameObject>("SkillMenu"));
             mainPanel.name = "SkillMenu";
 
             mainPanel.SetActive(false);
 
             infoPanel = mainPanel.transform.GetChild(1).gameObject;
+            infoPanel.SetActive(false);
 
             GameObject resumeButton = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons/Resume");
             GameObject backButton = GameObject.Instantiate(resumeButton);
@@ -105,7 +107,7 @@ namespace LethalProgression.GUI
             //////////////////////////////////////////////////
             shownSkills = 0;
 
-            foreach (KeyValuePair<string, Skill> skill in LethalProgression.XPHandler.xpInstance.skillList.skills)
+            foreach (KeyValuePair<UpgradeType, Skill> skill in XPHandler.xpInstance.skillList.skills)
             {
                 //LethalProgress.Log.LogInfo("Creating button for " + skill.GetShortName());
                 GameObject skillButton = SetupUpgradeButton(skill.Value);
@@ -135,7 +137,7 @@ namespace LethalProgression.GUI
 
             if (!templateButton)
             {
-                LethalProgress.Log.LogError("Couldn't find template button!");
+                LethalPlugin.Log.LogError("Couldn't find template button!");
                 return null;
             }
 
@@ -179,6 +181,8 @@ namespace LethalProgression.GUI
 
         public void UpdateStatInfo(LethalProgression.Skills.Skill skill)
         {
+            if (!infoPanel.activeSelf)
+                infoPanel.SetActive(true);
             TextMeshProUGUI upgradeName = infoPanel.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI upgradeAmt = infoPanel.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI upgradeDesc = infoPanel.transform.GetChild(2).gameObject.GetComponent<TextMeshProUGUI>();
@@ -226,12 +230,12 @@ namespace LethalProgression.GUI
 
         public void AddSkillPoint(LethalProgression.Skills.Skill skill, int amt)
         {
-            if (LethalProgression.XPHandler.xpInstance.GetSkillPoints() <= 0)
+            if (XPHandler.xpInstance.GetSkillPoints() <= 0)
             {
                 return;
             }
 
-            int skillPoints = LethalProgression.XPHandler.xpInstance.GetSkillPoints();
+            int skillPoints = XPHandler.xpInstance.GetSkillPoints();
 
             if (skillPoints < amt)
             {
@@ -244,7 +248,7 @@ namespace LethalProgression.GUI
             }
 
             skill.AddLevel(amt);
-            LethalProgression.XPHandler.xpInstance.SetSkillPoints(LethalProgression.XPHandler.xpInstance.GetSkillPoints() - amt);
+            XPHandler.xpInstance.SetSkillPoints(XPHandler.xpInstance.GetSkillPoints() - amt);
             UpdateStatInfo(skill);
 
             foreach (var button in skillButtonsList)
@@ -266,7 +270,7 @@ namespace LethalProgression.GUI
             }
 
             skill.AddLevel(-amt);
-            LethalProgression.XPHandler.xpInstance.SetSkillPoints(LethalProgression.XPHandler.xpInstance.GetSkillPoints() + amt);
+            XPHandler.xpInstance.SetSkillPoints(XPHandler.xpInstance.GetSkillPoints() + amt);
             UpdateStatInfo(skill);
 
             foreach (var button in skillButtonsList)
@@ -283,7 +287,7 @@ namespace LethalProgression.GUI
             {
                 if (button.name == "VAL")
                 {
-                    LethalProgression.Skills.Skill skill = LethalProgression.XPHandler.xpInstance.skillList.skills["Scrap Value"];
+                    Skill skill = XPHandler.xpInstance.skillList.skills[UpgradeType.Value];
                     LoadSkillData(skill, button);
 
                     GameObject displayLabel = button.transform.GetChild(0).gameObject;
@@ -294,7 +298,7 @@ namespace LethalProgression.GUI
                     button.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
 
                     GameObject attributeLabel = button.transform.GetChild(2).gameObject;
-                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + LethalProgression.XPHandler.xpInstance.teamLootValue.Value * skill.GetMultiplier() + "% " + skill.GetAttribute() + ")");
+                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + XPHandler.xpInstance.teamLootValue.Value * skill.GetMultiplier() + "% " + skill.GetAttribute() + ")");
                 }
             }
         }

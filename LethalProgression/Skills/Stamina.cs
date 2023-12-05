@@ -8,11 +8,14 @@ namespace LethalProgression.Skills
 {
     internal class Stamina
     {
-        public static void StaminaUpdate(int oldStamina, int newStamina)
+        public static void StaminaUpdate(int updatedValue, int newStamina)
         {
+            Skill skill = XPHandler.xpInstance.skillList.skills[UpgradeType.Stamina];
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
-            localPlayer.sprintTime += (oldStamina * 0.05f);
-            LethalProgress.Log.LogInfo($"{oldStamina} old stamina, {newStamina} new stamina, {localPlayer.sprintTime} updated stamina");
+            // 1 level adds 2% more to 5. So that is equals to 5 * 1.02.
+            float addedStamina = (updatedValue * skill.GetMultiplier() / 100f) * 11f;
+            localPlayer.sprintTime += addedStamina;
+            LethalPlugin.Log.LogInfo($"{updatedValue} change, {newStamina} new stamina points, Adding {addedStamina} resulting in {localPlayer.sprintTime} stamina");
         }
     }
 }

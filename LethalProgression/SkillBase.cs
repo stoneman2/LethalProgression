@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using LethalProgression.Config;
 
 namespace LethalProgression.Skills
 {
     public enum UpgradeType
     {
-        Health,
+        HPRegen,
         Stamina,
         Battery,
         HandSlot,
@@ -19,20 +20,84 @@ namespace LethalProgression.Skills
 
     internal class SkillList
     {
-        public Dictionary<string ,Skill> skills = new Dictionary<string, Skill>()
+        public Dictionary<UpgradeType, Skill> skills = new Dictionary<UpgradeType, Skill>();
+
+        public void CreateSkill(UpgradeType upgrade, string name, string description, string shortname, string attribute, UpgradeType upgradeType, int cost, int maxLevel, float multiplier, Action<int, int> callback = null, bool teamShared = false)
         {
-            { "HP Regen", new Skill("Health Regen", "Your body heals itself faster, allowing you to recover from injuries quicker. Only regenerate up to 100 HP.", "HPR", "Health Regeneration",
-                UpgradeType.Health, 1, 20, 0.05f) },
-            { "Stamina", new Skill("Extra Stamina", "Work on your stamina, sprint just that much longer!", "STM", "Stamina",
-                UpgradeType.Stamina, 1, 99999, 2f, LethalProgression.Skills.Stamina.StaminaUpdate)},
-            { "Battery Life", new Skill("Battery Life",
-                "You brought better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.", "BAT", "Battery Life",
-                UpgradeType.Battery, 1, 99999, 5f) },
-            { "Hand Slot", new Skill("Hand Slot", "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one more slot! 10 per slot.)", "HND", "Hand Slots",
-                UpgradeType.HandSlot, 1, 30, 10f, LethalProgression.Skills.HandSlots.HandSlotsUpdate) },
-            { "Scrap Value", new Skill("Team Scrap Value", "The company favors you, giving you better deals when bartering.", "VAL", "Team Loot Value",
-                UpgradeType.Value, 1, 99999, 1f, LethalProgression.XPHandler.xpInstance.TeamLootValueUpdate, true) },
-        };
+            Skill newSkill = new Skill(name, description, shortname, attribute, upgradeType, cost, maxLevel, multiplier, callback, teamShared);
+            skills.Add(upgrade, newSkill);
+        }
+
+        public void InitializeSkills()
+        {
+            if (SkillConfig.configHealthRegenEnabled.Value)
+            {
+                CreateSkill(UpgradeType.HPRegen,
+                    "Health Regen",
+                    "Your body heals itself faster, allowing you to recover from injuries quicker. Only regenerate up to 100 HP.",
+                    "HPR",
+                    "Health Regeneration",
+                    UpgradeType.HPRegen,
+                    1,
+                    SkillConfig.configHealthRegenMaxLevel.Value,
+                    SkillConfig.configHealthRegenMultiplier.Value);
+            }
+
+            if (SkillConfig.configStaminaEnabled.Value)
+            {
+                CreateSkill(UpgradeType.Stamina,
+                    "Stamina",
+                    "The company gives you a better pair of lungs, allowing you to run for longer.",
+                    "STM",
+                    "Stamina",
+                    UpgradeType.Stamina,
+                    1,
+                    SkillConfig.configStaminaMaxLevel.Value,
+                    SkillConfig.configStaminaMultiplier.Value,
+                    Stamina.StaminaUpdate);
+            }
+
+            if (SkillConfig.configBatteryLifeEnabled.Value)
+            {
+                CreateSkill(UpgradeType.Battery,
+                    "Battery Life",
+                    "You brought better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.",
+                    "BAT",
+                    "Battery Life",
+                    UpgradeType.Battery,
+                    1,
+                    SkillConfig.configBatteryLifeMaxLevel.Value,
+                    SkillConfig.configBatteryLifeMultiplier.Value);
+            }
+
+            if (SkillConfig.configHandSlotsEnabled.Value && !LethalPlugin.ReservedSlots)
+            {
+                CreateSkill(UpgradeType.HandSlot,
+                     "Hand Slot",
+                     "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one more slot! 10 per slot.)",
+                     "HND",
+                     "Hand Slots",
+                     UpgradeType.HandSlot,
+                     1,
+                     SkillConfig.configHandSlotsMaxLevel.Value,
+                     SkillConfig.configHandSlotsMultiplier.Value,
+                     HandSlots.HandSlotsUpdate);
+            }
+
+            if (SkillConfig.configLootValueEnabled.Value)
+            {
+                CreateSkill(UpgradeType.Value,
+                    "Scrap Value",
+                    "The company favors you, giving you better deals when bartering.",
+                    "VAL",
+                    "Team Loot Value",
+                    UpgradeType.Value,
+                    1,
+                    SkillConfig.configLootValueMaxLevel.Value,
+                    SkillConfig.configLootValueMultiplier.Value,
+                    XPHandler.xpInstance.TeamLootValueUpdate);
+            }
+        }
     }
 
     internal class Skill
