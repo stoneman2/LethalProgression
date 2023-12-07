@@ -13,6 +13,10 @@ using GameNetcodeStuff;
 using LethalProgression.Config;
 using LethalProgression.Skills;
 using LethalProgression.GUI;
+using LethalProgression.Patches;
+using BepInEx.Configuration;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace LethalProgression
 {
@@ -70,16 +74,17 @@ namespace LethalProgression
 
             System.IO.File.WriteAllText(path, xpBuild);
 
-            foreach (KeyValuePair<UpgradeType, LethalProgression.Skills.Skill> skill in LethalProgression.XPHandler.xpInstance.skillList.skills)
-            {
-                skill.Value.SetLevel(0);
-            }
-
             xpInstance.SetSkillPoints(5);
             xpInstance.xpLevel.Value = 0;
             xpInstance.xpPoints.Value = 0;
             xpInstance.profit.Value = 0;
             xpInstance.teamLootValue.Value = 0;
+            xpInstance.xpReq.Value  = xpInstance.GetXPRequirement();
+
+            foreach(Skill skill in xpInstance.skillList.skills.Values)
+            {
+                skill.SetLevel(0);
+            }
         }
 
         [HarmonyPostfix]
@@ -153,6 +158,8 @@ namespace LethalProgression
         public LethalProgression.GUI.SkillsGUI guiObj;
         public void Start()
         {
+            SyncConfig_ServerRpc();
+
             if (GameNetworkManager.Instance.isHostingGame)
             {
                 int savefileNum = GameNetworkManager.Instance.saveFileNum + 1;
@@ -194,30 +201,31 @@ namespace LethalProgression
 
             teamLootValue.OnValueChanged += guiObj.TeamLootHudUpdate;
 
-            GetEveryoneHandSlots_ServerRpc();
-
+            HandSlotSync_ServerRpc();
             ChangeXPRequirement_ServerRpc();
         }
+
         public int GetXPRequirement()
         {
             // First, we need to check how many players.
             int playerCount = StartOfRound.Instance.connectedPlayersAmount;
             int quota = TimeOfDay.Instance.timesFulfilledQuota;
 
-            int initialXPCost = SkillConfig.configXPMin.Value;
+            int initialXPCost = int.Parse(SkillConfig.hostConfig["XP Minimum"]);
+            int maxXPCost = int.Parse(SkillConfig.hostConfig["XP Maximum"]);
 
-            int personScale = SkillConfig.configPersonScale.Value;
+            int personScale = int.Parse(SkillConfig.hostConfig["Person Multiplier"]);
             int personValue = playerCount * personScale;
             int req = initialXPCost + personValue;
 
             // Quota multiplier
-            int quotaMult = SkillConfig.configQuotaMult.Value;
+            int quotaMult = int.Parse(SkillConfig.hostConfig["Quota Multiplier"]);
             int quotaVal = quota * quotaMult;
             req += (int)(req * (quotaVal / 100f));
 
-            if (req > SkillConfig.configXPMax.Value)
+            if (req > maxXPCost)
             {
-                req = SkillConfig.configXPMax.Value;
+                req = maxXPCost;
             }
 
             LethalPlugin.Log.LogInfo($"{playerCount} players, {quota} quotas, {initialXPCost} initial cost, {personValue} person value, {quotaVal} quota value, {req} total cost.");
@@ -304,7 +312,7 @@ namespace LethalProgression
         [ClientRpc]
         public void XPHUDUpdate_ClientRPC(int oldXP, int newXP, int xpGained)
         {
-            LethalProgression.Patches.HUDManagerPatch.ShowXPUpdate(oldXP, newXP, newXP - oldXP);
+            HUDManagerPatch.ShowXPUpdate(oldXP, newXP, newXP - oldXP);
         }
 
         [ClientRpc]
@@ -344,6 +352,7 @@ namespace LethalProgression
         {
             if (LethalPlugin.ReservedSlots)
                 return;
+
             SetPlayerHandslots_ClientRpc(playerID, newSlots);
         }
 
@@ -359,10 +368,16 @@ namespace LethalProgression
             {
                 if (player.playerClientId == playerID)
                 {
+                    int newAmount = 4 + newSlots;
                     List<GrabbableObject> objects = new List<GrabbableObject>(player.ItemSlots);
-                    player.ItemSlots = new GrabbableObject[4 + newSlots];
-                    for (int i = 0; i < objects.Count; i++)
+
+                    player.ItemSlots = new GrabbableObject[newAmount];
+                    for (int i = 0; i < newAmount; i++)
                     {
+                        LethalPlugin.Log.LogInfo($"Setting slot {i}!");
+                        if (objects.Count < newAmount)
+                            continue;
+
                         player.ItemSlots[i] = objects[i];
                     }
                     LethalPlugin.Log.LogInfo($"Player {playerID} has {player.ItemSlots.Length} slots after setting.");
@@ -373,12 +388,10 @@ namespace LethalProgression
 
         // When joining.
         [ServerRpc(RequireOwnership = false)]
-        public void GetEveryoneHandSlots_ServerRpc()
+        public void HandSlotSync_ServerRpc()
         {
             if (LethalPlugin.ReservedSlots)
                 return;
-
-            Dictionary<ulong, int> handSlotDict = new Dictionary<ulong, int>();
 
             // Compile a list of all players and their handslots.
             foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
@@ -391,10 +404,34 @@ namespace LethalProgression
             }
         }
 
+        [ServerRpc(RequireOwnership = false)]
+        public void SyncConfig_ServerRpc()
+        {
+            IDictionary<string, string> localConfig = SkillConfig.configFile.GetConfigEntries().ToDictionary(
+                entry => entry.Definition.Key,
+                entry => entry.GetSerializedValue()
+            );
+
+            string serializedConfig = JsonConvert.SerializeObject(localConfig);
+            SendEveryoneConfigs_ClientRpc(serializedConfig);
+        }
+
         [ClientRpc]
         public void SendEveryoneHandSlots_ClientRpc(ulong playerID, int handSlots)
         {
             SetHandSlot(playerID, handSlots);
+        }
+
+        [ClientRpc]
+        public void SendEveryoneConfigs_ClientRpc(string serializedConfig)
+        {
+            IDictionary<string, string> configs = JsonConvert.DeserializeObject<IDictionary<string, string>>(serializedConfig);
+            // Apply configs.
+            foreach (KeyValuePair<string, string> entry in configs)
+            {
+                SkillConfig.hostConfig[entry.Key] = entry.Value;
+                LethalPlugin.Log.LogInfo($"Loaded host config: {entry.Key} = {entry.Value}");
+            }
         }
     }
 }

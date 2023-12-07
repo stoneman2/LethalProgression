@@ -54,6 +54,9 @@
       <Reference Include="MonoMod.Utils">
         <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\BepInEx\core\MonoMod.Utils.dll</HintPath>
       </Reference>
+      <Reference Include="Newtonsoft.Json">
+        <HintPath>..\..\..\Libraries\Newtonsoft.Json.dll</HintPath>
+      </Reference>
       <Reference Include="Unity.InputSystem">
         <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.InputSystem.dll</HintPath>
       </Reference>

@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using GameNetcodeStuff;
 using HarmonyLib;
+using UnityEngine.InputSystem.Controls;
+using UnityEngine.InputSystem;
+using UnityEngine;
 
 namespace LethalProgression.Skills
 {

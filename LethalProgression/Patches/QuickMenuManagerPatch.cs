@@ -61,11 +61,11 @@ namespace LethalProgression.Patches
             // XP Level, which is just the level you're on.
             // Profit, which is how much money you've made.
 
-            _xpText.text = LethalProgression.XPHandler.xpInstance.GetXP().ToString() + " / " + LethalProgression.XPHandler.xpInstance.xpReq.Value.ToString();
-            _xpLevel.text = "Level: " + LethalProgression.XPHandler.xpInstance.GetLevel().ToString();
-            _profit.text = "You've made.. " + LethalProgression.XPHandler.xpInstance.GetProfit().ToString() + "$";
+            _xpText.text = XPHandler.xpInstance.GetXP().ToString() + " / " + XPHandler.xpInstance.xpReq.Value.ToString();
+            _xpLevel.text = "Level: " + XPHandler.xpInstance.GetLevel().ToString();
+            _profit.text = "You've made.. " + XPHandler.xpInstance.GetProfit().ToString() + "$";
             // Set the bar fill
-            _xpBarProgress.GetComponent<Image>().fillAmount = LethalProgression.XPHandler.xpInstance.GetXP() / (float)LethalProgression.XPHandler.xpInstance.xpReq.Value;
+            _xpBarProgress.GetComponent<Image>().fillAmount = XPHandler.xpInstance.GetXP() / (float)XPHandler.xpInstance.xpReq.Value;
         }
 
         public static void MakeNewXPBar()
