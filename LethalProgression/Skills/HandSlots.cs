@@ -11,28 +11,11 @@ namespace LethalProgression.Skills
 {
     internal class HandSlots
     {
-        public static int currentSlotCount = 4;
+        public static int currentPlayerSlots;
         public static void HandSlotsUpdate(int updateValue, int newValue)
         {
             if (LethalPlugin.ReservedSlots)
                 return;
-
-            float addedSlots = XPHandler.xpInstance.skillList.skills[UpgradeType.HandSlot].GetTrueValue() / 100;
-            int slotCount = 4 + (int)Math.Floor(addedSlots);
-
-            int addedSlot = slotCount - currentSlotCount;
-            if (addedSlot != 0)
-            {
-                LethalPlugin.Log.LogInfo($"Change in slot is {addedSlot}");
-            }
-            else
-            {
-                LethalPlugin.Log.LogInfo($"No change in slots. It is still {slotCount}");
-                return;
-            }
-
-            // Check if we are adding or removing slots.
-            LethalPlugin.Log.LogInfo($"Updating values: {updateValue}, new slot count: {slotCount}");
 
             // Credit to Mike for this code! https://github.com/MikeS-MS/MikesTweaks/
 
@@ -47,27 +30,27 @@ namespace LethalProgression.Skills
                 Object.Destroy(child.gameObject);
             }
 
+            int skillPercent = (int)LethalProgression.XPHandler.xpInstance.skillList.skills[UpgradeType.HandSlot].GetTrueValue();
+            int slotsToAdd = (int)Math.Floor((double)(skillPercent / 100));
+
             // Prepare the arrays
-            Image[] ItemSlotIconFrames = new Image[slotCount];
+            Image[] ItemSlotIconFrames = new Image[4 + slotsToAdd];
             ItemSlotIconFrames[0] = HUDManager.Instance.itemSlotIconFrames[0];
             ItemSlotIconFrames[1] = HUDManager.Instance.itemSlotIconFrames[1];
             ItemSlotIconFrames[2] = HUDManager.Instance.itemSlotIconFrames[2];
             ItemSlotIconFrames[3] = HUDManager.Instance.itemSlotIconFrames[3];
 
-            Image[] ItemSlotIcons = new Image[slotCount];
+            Image[] ItemSlotIcons = new Image[4 + slotsToAdd];
             ItemSlotIcons[0] = HUDManager.Instance.itemSlotIcons[0];
             ItemSlotIcons[1] = HUDManager.Instance.itemSlotIcons[1];
             ItemSlotIcons[2] = HUDManager.Instance.itemSlotIcons[2];
             ItemSlotIcons[3] = HUDManager.Instance.itemSlotIcons[3];
 
-            GameObject Slot3 = GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD/Inventory/Slot3");
-            GameObject Slot4 = XPHandler.xpInstance.guiObj.templateSlot;
-            GameObject CurrentSlot = Slot3;
-
-            currentSlotCount = slotCount;
+            GameObject Slot4 = GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD/Inventory/Slot3");
+            GameObject CurrentSlot = Slot4;
 
             // Spawn more UI slots.
-            for (int i = 0; i < (int)addedSlots; i++)
+            for (int i = 0; i < slotsToAdd; i++)
             {
                 GameObject NewSlot = Object.Instantiate(Slot4);
 
@@ -84,27 +67,32 @@ namespace LethalProgression.Skills
                 CurrentSlot = NewSlot;
 
                 ItemSlotIconFrames[3 + (i + 1)] = NewSlot.GetComponent<Image>();
-                ItemSlotIcons[3 + (i + 1)] = NewSlot.transform.GetChild(0).GetComponent<Image>();
+                ItemSlotIcons[3 + (i + 1)] = NewSlot.transform.GetChild(0).GetComponent<Image>(); ;
 
-                NewSlot.SetActive(true);
-            }
+                Vector3 localPositionIcon = ItemSlotIcons[i].transform.localPosition;
+                ItemSlotIcons[i].transform.SetLocalPositionAndRotation(
+                    new Vector3(localPositionIcon.x - (addedSlot * 25), localPositionIcon.y, localPositionIcon.z),
+                    ItemSlotIcons[i].transform.localRotation);
 
-            // After setting everything, move the positions so it is more centered on the screen.
-            for (int i = 0; i < ItemSlotIconFrames.Length; i++)
-            {
-                // use addedSlot to determine how much to move the slots.
-                Vector3 localPositionFrame = ItemSlotIconFrames[i].transform.localPosition;
-                ItemSlotIconFrames[i].transform.SetLocalPositionAndRotation(
-                    new Vector3(localPositionFrame.x - (addedSlot * 25), localPositionFrame.y, localPositionFrame.z),
-                    ItemSlotIconFrames[i].transform.localRotation);
+                Vector3 localPositionIcon = ItemSlotIcons[i].transform.localPosition;
+                ItemSlotIcons[i].transform.SetLocalPositionAndRotation(
+                    new Vector3(localPositionIcon.x - (addedSlot * 25), localPositionIcon.y, localPositionIcon.z),
+                    ItemSlotIcons[i].transform.localRotation);
+
+                Vector3 localPositionIcon = ItemSlotIcons[i].transform.localPosition;
+                ItemSlotIcons[i].transform.SetLocalPositionAndRotation(
+                    new Vector3(localPositionIcon.x - (addedSlot * 25), localPositionIcon.y, localPositionIcon.z),
+                    ItemSlotIcons[i].transform.localRotation);
             }
 
             HUDManager.Instance.itemSlotIconFrames = ItemSlotIconFrames;
             HUDManager.Instance.itemSlotIcons = ItemSlotIcons;
 
+
+
             // Tell the server we've updated our hand slots.
             ulong playerID = GameNetworkManager.Instance.localPlayerController.playerClientId;
-            LethalProgression.XPHandler.xpInstance.ServerHandSlots_ServerRpc(playerID, (int)addedSlots);
+            LethalProgression.XPHandler.xpInstance.ServerHandSlots_ServerRpc(playerID, slotsToAdd);
         }
     }
 }

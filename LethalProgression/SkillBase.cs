@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 using LethalProgression.Config;
-using LethalProgression.Skills;
 
 namespace LethalProgression.Skills
 {
@@ -17,7 +16,6 @@ namespace LethalProgression.Skills
         Battery,
         HandSlot,
         Value,
-        Oxygen,
     }
 
     internal class SkillList
@@ -32,7 +30,7 @@ namespace LethalProgression.Skills
 
         public void InitializeSkills()
         {
-            if (bool.Parse(SkillConfig.hostConfig["Health Regen Enabled"]))
+            if (SkillConfig.configHealthRegenEnabled.Value)
             {
                 CreateSkill(UpgradeType.HPRegen,
                     "Health Regen",
@@ -41,11 +39,11 @@ namespace LethalProgression.Skills
                     "Health Regeneration",
                     UpgradeType.HPRegen,
                     1,
-                    int.Parse(SkillConfig.hostConfig["Health Regen Max Level"]),
-                    float.Parse(SkillConfig.hostConfig["Health Regen Multiplier"]));
+                    SkillConfig.configHealthRegenMaxLevel.Value,
+                    SkillConfig.configHealthRegenMultiplier.Value);
             }
 
-            if (bool.Parse(SkillConfig.hostConfig["Stamina Enabled"]))
+            if (SkillConfig.configStaminaEnabled.Value)
             {
                 CreateSkill(UpgradeType.Stamina,
                     "Stamina",
@@ -54,12 +52,12 @@ namespace LethalProgression.Skills
                     "Stamina",
                     UpgradeType.Stamina,
                     1,
-                    int.Parse(SkillConfig.hostConfig["Stamina Max Level"]),
-                    float.Parse(SkillConfig.hostConfig["Stamina Multiplier"]),
+                    SkillConfig.configStaminaMaxLevel.Value,
+                    SkillConfig.configStaminaMultiplier.Value,
                     Stamina.StaminaUpdate);
             }
 
-            if (bool.Parse(SkillConfig.hostConfig["Battery Life Enabled"]))
+            if (SkillConfig.configBatteryLifeEnabled.Value)
             {
                 CreateSkill(UpgradeType.Battery,
                     "Battery Life",
@@ -68,11 +66,11 @@ namespace LethalProgression.Skills
                     "Battery Life",
                     UpgradeType.Battery,
                     1,
-                    int.Parse(SkillConfig.hostConfig["Battery Life Max Level"]),
-                    float.Parse(SkillConfig.hostConfig["Battery Life Multiplier"]));
+                    SkillConfig.configBatteryLifeMaxLevel.Value,
+                    SkillConfig.configBatteryLifeMultiplier.Value);
             }
 
-            if (bool.Parse(SkillConfig.hostConfig["Hand Slots Enabled"]) && !LethalPlugin.ReservedSlots)
+            if (SkillConfig.configHandSlotsEnabled.Value && !LethalPlugin.ReservedSlots)
             {
                 CreateSkill(UpgradeType.HandSlot,
                      "Hand Slot",
@@ -81,39 +79,23 @@ namespace LethalProgression.Skills
                      "Hand Slots",
                      UpgradeType.HandSlot,
                      1,
-                     int.Parse(SkillConfig.hostConfig["Hand Slots Max Level"]),
-                     float.Parse(SkillConfig.hostConfig["Hand Slots Multiplier"]),
+                     SkillConfig.configHandSlotsMaxLevel.Value,
+                     SkillConfig.configHandSlotsMultiplier.Value,
                      HandSlots.HandSlotsUpdate);
             }
 
-
-            if (bool.Parse(SkillConfig.hostConfig["Loot Value Enabled"]))
+            if (SkillConfig.configLootValueEnabled.Value)
             {
                 CreateSkill(UpgradeType.Value,
                     "Scrap Value",
-                    "Perhaps you're just lucky, or they're sending you to jucier moons, scrap values are plentiful! (Applies on mapload. Not real time.)",
+                    "The company favors you, giving you better deals when bartering.",
                     "VAL",
                     "Team Loot Value",
                     UpgradeType.Value,
                     1,
-                    int.Parse(SkillConfig.hostConfig["Loot Value Max Level"]),
-                    float.Parse(SkillConfig.hostConfig["Loot Value Multiplier"]),
+                    SkillConfig.configLootValueMaxLevel.Value,
+                    SkillConfig.configLootValueMultiplier.Value,
                     XPHandler.xpInstance.TeamLootValueUpdate);
-            }
-
-            if (bool.Parse(SkillConfig.hostConfig["Oxygen Enabled"]))
-            {
-                LethalPlugin.Log.LogInfo("ran oxygen");
-                CreateSkill(UpgradeType.Oxygen,
-                    "Oxygen",
-                    "Oxygen tanks, why didn't anyone think of that? Survive longer in the water.",
-                    "OXY",
-                    "More time in water",
-                    UpgradeType.Oxygen,
-                    1,
-                    int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
-                    float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"]
-                    ));
             }
         }
     }

@@ -76,9 +76,9 @@ namespace LethalProgression
             SkillConfig.InitConfig();
         }
 
-        public void BindConfig<T>(string section, string key, T defaultValue, string description = "")
+        public void BindConfig<T>(ref ConfigEntry<T> config, string section, string key, T defaultValue, string description = "")
         {
-            SkillConfig.configFile.Bind(section,
+            config = Config.Bind(section,
                 key,
                 defaultValue,
                 description
