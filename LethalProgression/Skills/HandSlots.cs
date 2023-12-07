@@ -97,11 +97,6 @@ namespace LethalProgression.Skills
                 ItemSlotIconFrames[i].transform.SetLocalPositionAndRotation(
                     new Vector3(localPositionFrame.x - (addedSlot * 25), localPositionFrame.y, localPositionFrame.z),
                     ItemSlotIconFrames[i].transform.localRotation);
-
-                Vector3 localPositionIcon = ItemSlotIcons[i].transform.localPosition;
-                ItemSlotIcons[i].transform.SetLocalPositionAndRotation(
-                    new Vector3(localPositionIcon.x - (addedSlot * 25), localPositionIcon.y, localPositionIcon.z),
-                    ItemSlotIcons[i].transform.localRotation);
             }
 
             HUDManager.Instance.itemSlotIconFrames = ItemSlotIconFrames;
