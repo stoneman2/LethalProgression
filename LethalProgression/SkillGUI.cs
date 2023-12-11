@@ -10,23 +10,83 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using LethalProgression.Patches;
+using LethalProgression.Config;
 
 namespace LethalProgression.GUI
 {
     [HarmonyPatch]
-    internal class QuickMenuManagerPatch
+    internal class GUIUpdate
     {
+        public static bool isMenuOpen = false;
+        public static SkillsGUI guiInstance;
         [HarmonyPostfix]
         [HarmonyPatch(typeof(QuickMenuManager), "Update")]
         private static void SkillMenuUpdate(QuickMenuManager __instance)
         {
-            if (!XPHandler.xpInstance.guiObj.mainPanel)
+            if (guiInstance == null)
+                return;
+
+            if (!guiInstance.mainPanel)
                 return;
 
             // If the menu is open, activate mainPanel.
-            if (XPHandler.xpInstance.guiObj.isMenuOpen)
+            if (isMenuOpen)
             {
-                XPHandler.xpInstance.guiObj.mainPanel.SetActive(true);
+
+                if (bool.Parse(SkillConfig.hostConfig["Unspec in Ship Only"]))
+                {
+                    // Check if you are in the ship right now
+                    if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
+                    {
+                        guiInstance.SetUnspec(true);
+                    }
+                    else
+                    {
+                        guiInstance.SetUnspec(false);
+                    }
+                }
+                GameObject scrollRect = guiInstance.mainPanel.transform.GetChild(3).gameObject;
+                if (scrollRect.GetComponent<ScrollRect>().verticalNormalizedPosition >= 0.95f) // Scrolled near end
+                {
+                    guiInstance.mainPanel.transform.GetChild(4).gameObject.SetActive(true);
+                    guiInstance.mainPanel.transform.GetChild(5).gameObject.SetActive(false);
+                }
+                else if (scrollRect.GetComponent<ScrollRect>().verticalNormalizedPosition <= 0.05f) // At the top
+                {
+                    guiInstance.mainPanel.transform.GetChild(4).gameObject.SetActive(false);
+                    guiInstance.mainPanel.transform.GetChild(5).gameObject.SetActive(true);
+                }
+                else
+                {
+                    guiInstance.mainPanel.transform.GetChild(4).gameObject.SetActive(false);
+                }
+                // Get mouse position.
+                Vector2 mousePos = Mouse.current.position.ReadValue();
+                // If the mouse is currently on the PointsPanel
+                GameObject pointsPanel = guiInstance.mainPanel.transform.GetChild(2).gameObject;
+                float xLeast = pointsPanel.transform.position.x - pointsPanel.GetComponent<RectTransform>().rect.width;
+                float xMost = pointsPanel.transform.position.x + pointsPanel.GetComponent<RectTransform>().rect.width;
+                float yLeast = pointsPanel.transform.position.y - pointsPanel.GetComponent<RectTransform>().rect.height;
+                float yMost = pointsPanel.transform.position.y + pointsPanel.GetComponent<RectTransform>().rect.height;
+                if (mousePos.x >= xLeast && mousePos.x <= xMost)
+                {
+                    if (mousePos.y >= yLeast && mousePos.y <= yMost)
+                    {
+                        // If the mouse is on the points panel, show the tooltip.
+                        guiInstance.mainPanel.transform.GetChild(2).GetChild(2).gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        guiInstance.mainPanel.transform.GetChild(2).GetChild(2).gameObject.SetActive(false);
+                    }
+                }
+                else
+                {
+                    guiInstance.mainPanel.transform.GetChild(2).GetChild(2).gameObject.SetActive(false);
+                }
+
+
+                guiInstance.mainPanel.SetActive(true);
                 GameObject mainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
                 mainButtons.SetActive(false);
 
@@ -37,49 +97,43 @@ namespace LethalProgression.GUI
             }
             else
             {
-                XPHandler.xpInstance.guiObj.mainPanel.SetActive(false);
+                guiInstance.mainPanel.SetActive(false);
             }
         }
         [HarmonyPostfix]
         [HarmonyPatch(typeof(QuickMenuManager), "CloseQuickMenu")]
         private static void SkillMenuClose(QuickMenuManager __instance)
         {
-            // This runs when someone presses esc in our menu
-            XPHandler.xpInstance.guiObj.isMenuOpen = false;
+            isMenuOpen = false;
         }
 
         private static void RealTimeUpdateInfo()
         {
-            GameObject tempObj = XPHandler.xpInstance.guiObj.mainPanel.transform.GetChild(2).gameObject;
+            GameObject tempObj = guiInstance.mainPanel.transform.GetChild(2).gameObject;
             tempObj = tempObj.transform.GetChild(1).gameObject;
 
             TextMeshProUGUI points = tempObj.GetComponent<TextMeshProUGUI>();
-            points.text = XPHandler.xpInstance.GetSkillPoints().ToString();
+            points.text = LP_NetworkManager.xpInstance.GetSkillPoints().ToString();
         }
     }
     internal class SkillsGUI
     {
-        // This includes:
-        // - The main panel to hold the entire skill menu.
-        // - Big box saying "Upgrades:" and then the number of skill points.
-        // - Skill buttons objects. With text next to it.
-        // - Back button to go back to pause menu.
-        // - Info panel on the right. A lot of info inside.
         public GameObject mainPanel;
         public GameObject infoPanel;
-        public LethalProgression.Skills.Skill activeSkill;
+        public Skill activeSkill;
+        public GameObject templateSlot;
         public List<GameObject> skillButtonsList = new List<GameObject>();
-        public bool isMenuOpen = false;
         public SkillsGUI()
         {
             CreateSkillMenu();
+            GUIUpdate.guiInstance = this;
         }
         public void OpenSkillMenu()
         {
-            isMenuOpen = true;
+            GUIUpdate.isMenuOpen = true;
             mainPanel.SetActive(true);
         }
-
+        public int shownSkills = 0;
         public void CreateSkillMenu()
         {
             mainPanel = GameObject.Instantiate(LethalPlugin.skillBundle.LoadAsset<GameObject>("SkillMenu"));
@@ -87,32 +141,36 @@ namespace LethalProgression.GUI
 
             mainPanel.SetActive(false);
 
+            templateSlot = GameObject.Instantiate(GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD/Inventory/Slot3"));
+            templateSlot.name = "TemplateSlot";
+            templateSlot.SetActive(false);
+
             infoPanel = mainPanel.transform.GetChild(1).gameObject;
             infoPanel.SetActive(false);
 
-            GameObject resumeButton = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons/Resume");
-            GameObject backButton = GameObject.Instantiate(resumeButton);
-            backButton.name = "Back";
-            backButton.GetComponentInChildren<TextMeshProUGUI>().text = "> Back";
-
-            backButton.transform.SetParent(mainPanel.transform, false);
+            GameObject backButton = mainPanel.transform.GetChild(6).gameObject;
             backButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
             backButton.GetComponent<Button>().onClick.AddListener(BackButton);
-
-            backButton.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
-            backButton.transform.Translate(-700f, -900f, 0f);
 
             //////////////////////////////////////////////////
             /// Different upgrade buttons:
             //////////////////////////////////////////////////
             shownSkills = 0;
 
-            foreach (KeyValuePair<UpgradeType, Skill> skill in XPHandler.xpInstance.skillList.skills)
+            if (LP_NetworkManager.xpInstance.skillList.skills == null)
             {
-                //LethalProgress.Log.LogInfo("Creating button for " + skill.GetShortName());
+                LethalPlugin.Log.LogInfo("Skill list is null!");
+                return;
+            }
+
+            foreach (KeyValuePair<UpgradeType, Skill> skill in LP_NetworkManager.xpInstance.skillList.skills)
+            {
+                LethalPlugin.Log.LogInfo("Creating button for " + skill.Value.GetShortName());
                 GameObject skillButton = SetupUpgradeButton(skill.Value);
+                LethalPlugin.Log.LogInfo("Setup passed!");
 
                 skillButtonsList.Add(skillButton);
+                LethalPlugin.Log.LogInfo("Added to skill list..");
                 LoadSkillData(skill.Value, skillButton);
             }
 
@@ -121,15 +179,24 @@ namespace LethalProgression.GUI
 
         public void BackButton()
         {
-            isMenuOpen = false;
+            GUIUpdate.isMenuOpen = false;
             GameObject mainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
             mainButtons.SetActive(true);
 
             GameObject playerList = GameObject.Find("Systems/UI/Canvas/QuickMenu/PlayerList");
             playerList.SetActive(true);
         }
-
-        public int shownSkills = 0;
+        public void SetUnspec(bool show)
+        {
+            GameObject minusFive = infoPanel.transform.GetChild(6).gameObject;
+            GameObject minusTwo = infoPanel.transform.GetChild(7).gameObject;
+            GameObject minusOne = infoPanel.transform.GetChild(8).gameObject;
+            minusFive.SetActive(show);
+            minusTwo.SetActive(show);
+            minusOne.SetActive(show);
+            GameObject unSpecHelpText = infoPanel.transform.GetChild(9).gameObject;
+            unSpecHelpText.SetActive(!show);
+        }
         public GameObject SetupUpgradeButton(LethalProgression.Skills.Skill skill)
         {
             GameObject templateButton = mainPanel.transform.GetChild(0).gameObject;
@@ -142,8 +209,10 @@ namespace LethalProgression.GUI
             }
 
             button.name = skill.GetShortName();
-            button.transform.SetParent(mainPanel.transform, false);
-            button.transform.Translate(0f, -100f * shownSkills, 0f);
+
+            GameObject skillScroller = mainPanel.transform.GetChild(3).gameObject;
+            GameObject skillContents = skillScroller.transform.GetChild(0).gameObject;
+            button.transform.SetParent(skillContents.transform, false);
 
             shownSkills++;
 
@@ -230,12 +299,12 @@ namespace LethalProgression.GUI
 
         public void AddSkillPoint(LethalProgression.Skills.Skill skill, int amt)
         {
-            if (XPHandler.xpInstance.GetSkillPoints() <= 0)
+            if (LP_NetworkManager.xpInstance.GetSkillPoints() <= 0)
             {
                 return;
             }
 
-            int skillPoints = XPHandler.xpInstance.GetSkillPoints();
+            int skillPoints = LP_NetworkManager.xpInstance.GetSkillPoints();
 
             if (skillPoints < amt)
             {
@@ -248,7 +317,7 @@ namespace LethalProgression.GUI
             }
 
             skill.AddLevel(amt);
-            XPHandler.xpInstance.SetSkillPoints(XPHandler.xpInstance.GetSkillPoints() - amt);
+            LP_NetworkManager.xpInstance.SetSkillPoints(LP_NetworkManager.xpInstance.GetSkillPoints() - amt);
             UpdateStatInfo(skill);
 
             foreach (var button in skillButtonsList)
@@ -270,7 +339,7 @@ namespace LethalProgression.GUI
             }
 
             skill.AddLevel(-amt);
-            XPHandler.xpInstance.SetSkillPoints(XPHandler.xpInstance.GetSkillPoints() + amt);
+            LP_NetworkManager.xpInstance.SetSkillPoints(LP_NetworkManager.xpInstance.GetSkillPoints() + amt);
             UpdateStatInfo(skill);
 
             foreach (var button in skillButtonsList)
@@ -287,7 +356,7 @@ namespace LethalProgression.GUI
             {
                 if (button.name == "VAL")
                 {
-                    Skill skill = XPHandler.xpInstance.skillList.skills[UpgradeType.Value];
+                    Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value];
                     LoadSkillData(skill, button);
 
                     GameObject displayLabel = button.transform.GetChild(0).gameObject;
@@ -298,7 +367,7 @@ namespace LethalProgression.GUI
                     button.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
 
                     GameObject attributeLabel = button.transform.GetChild(2).gameObject;
-                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + XPHandler.xpInstance.teamLootValue.Value * skill.GetMultiplier() + "% " + skill.GetAttribute() + ")");
+                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + LP_NetworkManager.xpInstance.teamLootValue.Value * skill.GetMultiplier() + "% " + skill.GetAttribute() + ")");
                 }
             }
         }

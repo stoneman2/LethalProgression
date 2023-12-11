@@ -17,12 +17,18 @@ namespace LethalProgression.Skills
             if (__instance.health >= 100)
                 return;
 
-            if (XPHandler.xpInstance.skillList.skills[UpgradeType.HPRegen].GetLevel() == 0)
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+                return;
+
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HPRegen))
+                return;
+
+            if (LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.HPRegen].GetLevel() == 0)
                 return;
 
             if (__instance.healthRegenerateTimer <= 0f)
             {
-                Skill skill = XPHandler.xpInstance.skillList.skills[UpgradeType.HPRegen];
+                Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.HPRegen];
                 float hps = skill.GetTrueValue();
                 // Then turn that into seconds. So, if hps is 0.5, then it will take 2 seconds to regen 1 health.
                 __instance.healthRegenerateTimer = 1f / hps;

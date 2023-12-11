@@ -51,7 +51,7 @@ namespace LethalProgression.Patches
             int scrapCost = GObject.scrapValue;
 
             // Give XP for the amount of money this scrap costs.
-            LethalProgression.XPHandler.xpInstance.AddXPServerRPC(scrapCost);
+            LP_NetworkManager.xpInstance.AddXPServerRPC(scrapCost);
         }
         [HarmonyPostfix]
         [HarmonyPatch(typeof(EnemyAI), "KillEnemy")]
@@ -65,7 +65,7 @@ namespace LethalProgression.Patches
             {
                 enemyReward = _enemyReward[enemyType];
             }
-            LethalProgression.XPHandler.xpInstance.AddXPServerRPC(enemyReward);
+            LP_NetworkManager.xpInstance.AddXPServerRPC(enemyReward);
         }
         public static void ShowXPUpdate(int oldXP, int newXP, int xp)
         {
@@ -75,8 +75,8 @@ namespace LethalProgression.Patches
 
             GameObject _tempprogress = GameObject.Find("/Systems/UI/Canvas/IngamePlayerHUD/BottomMiddle/XPUpdate/XPBarProgress");
 
-            _tempprogress.GetComponent<Image>().fillAmount = newXP / (float)LethalProgression.XPHandler.xpInstance.GetXPRequirement();
-            _tempText.text = newXP + " / " + (float)LethalProgression.XPHandler.xpInstance.GetXPRequirement();
+            _tempprogress.GetComponent<Image>().fillAmount = newXP / (float)LP_NetworkManager.xpInstance.GetXPRequirement();
+            _tempText.text = newXP + " / " + (float)LP_NetworkManager.xpInstance.GetXPRequirement();
 
             _tempBarTime = 2f;
 
@@ -113,7 +113,7 @@ namespace LethalProgression.Patches
         {
             levelText = GameObject.Instantiate(LethalPlugin.skillBundle.LoadAsset<GameObject>("LevelUp"));
 
-            levelText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Level Up! Spend your skill points. You have " + LethalProgression.XPHandler.xpInstance.GetSkillPoints() + ".";
+            levelText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Level Up! Spend your skill points. You have " + LP_NetworkManager.xpInstance.GetSkillPoints() + ".";
 
             // Make this not active
             levelText.gameObject.SetActive(false);

@@ -10,7 +10,13 @@ namespace LethalProgression.Skills
     {
         public static void StaminaUpdate(int updatedValue, int newStamina)
         {
-            Skill skill = XPHandler.xpInstance.skillList.skills[UpgradeType.Stamina];
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+                return;
+
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Stamina))
+                return;
+
+            Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Stamina];
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
             // 1 level adds 2% more to 5. So that is equals to 5 * 1.02.
             float addedStamina = (updatedValue * skill.GetMultiplier() / 100f) * 11f;

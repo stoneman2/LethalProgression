@@ -60,12 +60,11 @@ namespace LethalProgression.Patches
             // XP Text. Values of how much XP you need to level up.
             // XP Level, which is just the level you're on.
             // Profit, which is how much money you've made.
-
-            _xpText.text = LethalProgression.XPHandler.xpInstance.GetXP().ToString() + " / " + LethalProgression.XPHandler.xpInstance.xpReq.Value.ToString();
-            _xpLevel.text = "Level: " + LethalProgression.XPHandler.xpInstance.GetLevel().ToString();
-            _profit.text = "You've made.. " + LethalProgression.XPHandler.xpInstance.GetProfit().ToString() + "$";
+            _xpText.text = LP_NetworkManager.xpInstance.GetXP().ToString() + " / " + LP_NetworkManager.xpInstance.xpReq.Value.ToString();
+            _xpLevel.text = "Level: " + LP_NetworkManager.xpInstance.GetLevel().ToString();
+            _profit.text = "You've made.. " + LP_NetworkManager.xpInstance.GetProfit().ToString() + "$";
             // Set the bar fill
-            _xpBarProgress.GetComponent<Image>().fillAmount = LethalProgression.XPHandler.xpInstance.GetXP() / (float)LethalProgression.XPHandler.xpInstance.xpReq.Value;
+            _xpBarProgress.GetComponent<Image>().fillAmount = LP_NetworkManager.xpInstance.GetXP() / (float)LP_NetworkManager.xpInstance.xpReq.Value;
         }
 
         public static void MakeNewXPBar()
@@ -163,7 +162,7 @@ namespace LethalProgression.Patches
 
         private static void OpenSkillTree()
         {
-            LethalProgression.XPHandler.xpInstance.guiObj.OpenSkillMenu();
+            LP_NetworkManager.xpInstance.guiObj.OpenSkillMenu();
         }
     }
 }

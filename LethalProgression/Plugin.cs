@@ -16,6 +16,7 @@ using LethalProgression.GUI;
 using LethalProgression.Skills;
 using LethalProgression.Patches;
 using LethalProgression.Config;
+using Unity.Netcode;
 
 namespace LethalProgression
 {
@@ -32,7 +33,6 @@ namespace LethalProgression
 
         internal static ManualLogSource Log;
         internal static bool ReservedSlots;
-
         public static LethalPlugin Instance { get; private set; }
 
         private void Awake()
@@ -71,18 +71,26 @@ namespace LethalProgression
                 }
             }
 
-            SceneManager.sceneLoaded += LethalProgression.XPHandler.ClientConnectInitializer;
-
             SkillConfig.InitConfig();
         }
 
-        public void BindConfig<T>(ref ConfigEntry<T> config, string section, string key, T defaultValue, string description = "")
+        public void BindConfig<T>(string section, string key, T defaultValue, string description = "")
         {
-            config = Config.Bind(section,
+            Config.Bind(section,
                 key,
                 defaultValue,
                 description
             );
+        }
+
+        public IDictionary<string, string> GetAllConfigEntries()
+        {
+            IDictionary<string, string> localConfig = Config.GetConfigEntries().ToDictionary(
+                entry => entry.Definition.Key,
+                entry => entry.GetSerializedValue()
+            );
+
+            return localConfig;
         }
     }
 }

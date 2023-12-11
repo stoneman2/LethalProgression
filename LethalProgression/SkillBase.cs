@@ -16,6 +16,7 @@ namespace LethalProgression.Skills
         Battery,
         HandSlot,
         Value,
+        Oxygen,
     }
 
     internal class SkillList
@@ -28,9 +29,31 @@ namespace LethalProgression.Skills
             skills.Add(upgrade, newSkill);
         }
 
+        public bool IsSkillListValid()
+        {
+            if (skills.Count == 0)
+            {
+                Debug.LogError("Skill list is empty!");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool IsSkillValid(UpgradeType upgrade)
+        {
+            if (!skills.ContainsKey(upgrade))
+            {
+                Debug.LogError("Skill " + upgrade.ToString() + " is not in the skill list!");
+                return false;
+            }
+
+            return true;
+        }
+
         public void InitializeSkills()
         {
-            if (SkillConfig.configHealthRegenEnabled.Value)
+            if (bool.Parse(SkillConfig.hostConfig["Health Regen Enabled"]))
             {
                 CreateSkill(UpgradeType.HPRegen,
                     "Health Regen",
@@ -39,11 +62,11 @@ namespace LethalProgression.Skills
                     "Health Regeneration",
                     UpgradeType.HPRegen,
                     1,
-                    SkillConfig.configHealthRegenMaxLevel.Value,
-                    SkillConfig.configHealthRegenMultiplier.Value);
+                    int.Parse(SkillConfig.hostConfig["Health Regen Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Health Regen Multiplier"]));
             }
 
-            if (SkillConfig.configStaminaEnabled.Value)
+            if (bool.Parse(SkillConfig.hostConfig["Stamina Enabled"]))
             {
                 CreateSkill(UpgradeType.Stamina,
                     "Stamina",
@@ -52,12 +75,12 @@ namespace LethalProgression.Skills
                     "Stamina",
                     UpgradeType.Stamina,
                     1,
-                    SkillConfig.configStaminaMaxLevel.Value,
-                    SkillConfig.configStaminaMultiplier.Value,
+                    int.Parse(SkillConfig.hostConfig["Stamina Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Stamina Multiplier"]),
                     Stamina.StaminaUpdate);
             }
 
-            if (SkillConfig.configBatteryLifeEnabled.Value)
+            if (bool.Parse(SkillConfig.hostConfig["Battery Life Enabled"]))
             {
                 CreateSkill(UpgradeType.Battery,
                     "Battery Life",
@@ -66,11 +89,11 @@ namespace LethalProgression.Skills
                     "Battery Life",
                     UpgradeType.Battery,
                     1,
-                    SkillConfig.configBatteryLifeMaxLevel.Value,
-                    SkillConfig.configBatteryLifeMultiplier.Value);
+                    int.Parse(SkillConfig.hostConfig["Battery Life Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Battery Life Multiplier"]));
             }
 
-            if (SkillConfig.configHandSlotsEnabled.Value && !LethalPlugin.ReservedSlots)
+            if (bool.Parse(SkillConfig.hostConfig["Hand Slots Enabled"]) && !LethalPlugin.ReservedSlots)
             {
                 CreateSkill(UpgradeType.HandSlot,
                      "Hand Slot",
@@ -79,23 +102,37 @@ namespace LethalProgression.Skills
                      "Hand Slots",
                      UpgradeType.HandSlot,
                      1,
-                     SkillConfig.configHandSlotsMaxLevel.Value,
-                     SkillConfig.configHandSlotsMultiplier.Value,
+                     int.Parse(SkillConfig.hostConfig["Hand Slots Max Level"]),
+                     float.Parse(SkillConfig.hostConfig["Hand Slots Multiplier"]),
                      HandSlots.HandSlotsUpdate);
             }
 
-            if (SkillConfig.configLootValueEnabled.Value)
+            if (bool.Parse(SkillConfig.hostConfig["Loot Value Enabled"]))
             {
                 CreateSkill(UpgradeType.Value,
-                    "Scrap Value",
-                    "The company favors you, giving you better deals when bartering.",
+                    "Loot Value",
+                    "The company gives you a better pair of eyes, allowing you to see the value in things.",
                     "VAL",
-                    "Team Loot Value",
+                    "Loot Value",
                     UpgradeType.Value,
                     1,
-                    SkillConfig.configLootValueMaxLevel.Value,
-                    SkillConfig.configLootValueMultiplier.Value,
-                    XPHandler.xpInstance.TeamLootValueUpdate);
+                    int.Parse(SkillConfig.hostConfig["Loot Value Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Loot Value Multiplier"]),
+                    LootValue.LootValueUpdate);
+            }
+
+            if (bool.Parse(SkillConfig.hostConfig["Oxygen Enabled"]))
+            {
+                CreateSkill(UpgradeType.Oxygen,
+                    "Oxygen",
+                    "The company gives you a better pair of lungs, allowing you to hold your breath for longer.",
+                    "OXY",
+                    "Oxygen",
+                    UpgradeType.Oxygen,
+                    1,
+                    int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"])
+                    );
             }
         }
     }
