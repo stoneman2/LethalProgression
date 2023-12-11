@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Unity.Netcode;
+using LethalProgression.GUI;
 
 namespace LethalProgression.Patches
 {
@@ -104,6 +105,8 @@ namespace LethalProgression.Patches
         {
             int lootLevel = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.HandSlot].GetLevel();
             LP_NetworkManager.xpInstance.TeamLootValueUpdate(-lootLevel, 0);
+
+            GUIUpdate.isMenuOpen = false;
         }
 
         [HarmonyPostfix]

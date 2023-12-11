@@ -26,7 +26,7 @@ namespace LethalProgression
         public NetworkVariable<int> xpReq = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         // Special boys
-        public NetworkVariable<int> teamLootValue = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+        public NetworkVariable<float> teamLootValue = new NetworkVariable<float>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
         public int skillPoints;
         public SkillList skillList;
@@ -36,11 +36,6 @@ namespace LethalProgression
         {
             LethalPlugin.Log.LogInfo("XP Network Behavior Made!");
             PlayerConnect_ServerRpc();
-
-            if (GameNetworkManager.Instance.isHostingGame)
-            {
-                LoadSaveData();
-            }
         }
         public void LoadSaveData()
         {
@@ -196,16 +191,18 @@ namespace LethalProgression
         /////////////////////////////////////////////////
         /// Team Loot Upgrade Sync
         /////////////////////////////////////////////////
-        public void TeamLootValueUpdate(int update, int newValue)
+        public void TeamLootValueUpdate(float update, int newValue)
         {
             TeamLootValueUpdate_ServerRpc(update);
         }
 
         [ServerRpc(RequireOwnership = false)]
-        public void TeamLootValueUpdate_ServerRpc(int updatedValue)
+        public void TeamLootValueUpdate_ServerRpc(float updatedValue)
         {
-            teamLootValue.Value += updatedValue;
-            LethalPlugin.Log.LogInfo($"Team loot value updated by {updatedValue}.");
+            float mult = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value].GetMultiplier();
+            float newvalue = updatedValue * mult;
+            teamLootValue.Value += newvalue;
+            LethalPlugin.Log.LogInfo($"Changed team loot value by {updatedValue * mult} turning into {teamLootValue.Value}.");
         }
 
         /////////////////////////////////////////////////
@@ -218,6 +215,7 @@ namespace LethalProgression
         {
             if (LethalPlugin.ReservedSlots)
                 return;
+
             SetPlayerHandslots_ClientRpc(playerID, newSlots);
         }
 
@@ -255,7 +253,10 @@ namespace LethalProgression
             if (LethalPlugin.ReservedSlots)
                 return;
 
-            Dictionary<ulong, int> handSlotDict = new Dictionary<ulong, int>();
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
+            {
+                return;
+            }
 
             // Compile a list of all players and their handslots.
             foreach (PlayerControllerB player in StartOfRound.Instance.allPlayerScripts)
@@ -263,7 +264,7 @@ namespace LethalProgression
                 if (!player.gameObject.activeSelf)
                     continue;
                 ulong playerID = player.playerClientId;
-                int handSlots = (int)skillList.skills[UpgradeType.HandSlot].GetTrueValue();
+                int handSlots = player.ItemSlots.Length - 4;
                 SendEveryoneHandSlots_ClientRpc(playerID, handSlots);
             }
         }
@@ -296,6 +297,7 @@ namespace LethalProgression
 
             if (!Initialized)
             {
+                Initialized = true;
                 LP_NetworkManager.xpInstance = this;
                 skillList = new SkillList();
                 skillList.InitializeSkills();
@@ -303,6 +305,11 @@ namespace LethalProgression
                 guiObj = new SkillsGUI();
 
                 teamLootValue.OnValueChanged += guiObj.TeamLootHudUpdate;
+
+                if (GameNetworkManager.Instance.isHostingGame)
+                {
+                    LoadSaveData();
+                }
 
                 skillPoints = xpLevel.Value + 5;
 

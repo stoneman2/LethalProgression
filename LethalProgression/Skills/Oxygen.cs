@@ -41,6 +41,13 @@ namespace LethalProgression.Skills
         [HarmonyPatch(typeof(PlayerControllerB), "LateUpdate")]
         private static void OxygenUpdate(PlayerControllerB __instance)
         {
+
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+                return;
+
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Oxygen))
+                return;
+
             if (__instance.isPlayerDead)
             {
                 if (oxygenBar)
@@ -49,12 +56,6 @@ namespace LethalProgression.Skills
                 }
                 return;
             }
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
-                return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Oxygen))
-                return;
 
             if (LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Oxygen].GetLevel() == 0)
             {

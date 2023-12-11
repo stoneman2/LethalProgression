@@ -159,7 +159,7 @@ namespace LethalProgression.GUI
 
             if (LP_NetworkManager.xpInstance.skillList.skills == null)
             {
-                LethalPlugin.Log.LogInfo("Skill list is null!");
+                //LethalPlugin.Log.LogInfo("Skill list is null!");
                 return;
             }
 
@@ -248,10 +248,11 @@ namespace LethalProgression.GUI
             skillButton.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
         }
 
-        public void UpdateStatInfo(LethalProgression.Skills.Skill skill)
+        public void UpdateStatInfo(Skill skill)
         {
             if (!infoPanel.activeSelf)
                 infoPanel.SetActive(true);
+
             TextMeshProUGUI upgradeName = infoPanel.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI upgradeAmt = infoPanel.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI upgradeDesc = infoPanel.transform.GetChild(2).gameObject.GetComponent<TextMeshProUGUI>();
@@ -350,7 +351,7 @@ namespace LethalProgression.GUI
         }
 
         // START SPECIAL BOYS:
-        public void TeamLootHudUpdate(int oldValue, int newValue)
+        public void TeamLootHudUpdate(float oldValue, float newValue)
         {
             foreach (var button in skillButtonsList)
             {
@@ -367,7 +368,8 @@ namespace LethalProgression.GUI
                     button.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
 
                     GameObject attributeLabel = button.transform.GetChild(2).gameObject;
-                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + LP_NetworkManager.xpInstance.teamLootValue.Value * skill.GetMultiplier() + "% " + skill.GetAttribute() + ")");
+                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + LP_NetworkManager.xpInstance.teamLootValue.Value + "% " + skill.GetAttribute() + ")");
+                    LethalPlugin.Log.LogInfo($"Setting team value hud to {LP_NetworkManager.xpInstance.teamLootValue.Value}");
                 }
             }
         }

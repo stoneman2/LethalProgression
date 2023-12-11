@@ -149,7 +149,7 @@ namespace LethalProgression.Config
             LethalPlugin.Instance.BindConfig<float>(
                 "Skills",
                 "Loot Value Multiplier",
-                1f,
+                0.25f,
                 "How much does the loot value skill increase per level?"
                 );
 

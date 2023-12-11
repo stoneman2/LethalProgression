@@ -24,6 +24,12 @@ namespace LethalProgression.Skills
 
         public static void LootValueUpdate(int change, int newLevel)
         {
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+                return;
+
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Value))
+                return;
+
             LP_NetworkManager.xpInstance.TeamLootValueUpdate(change, newLevel);
         }
     }

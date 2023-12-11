@@ -33,7 +33,6 @@ namespace LethalProgression.Skills
         {
             if (skills.Count == 0)
             {
-                Debug.LogError("Skill list is empty!");
                 return false;
             }
 
@@ -131,8 +130,7 @@ namespace LethalProgression.Skills
                     UpgradeType.Oxygen,
                     1,
                     int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
-                    float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"])
-                    );
+                    float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"]));
             }
         }
     }
