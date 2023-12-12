@@ -53,9 +53,6 @@ namespace LethalProgression.Skills
 
         public void InitializeSkills()
         {
-            LethalPlugin.Log.LogInfo("Trying to initialize skills...");
-
-            LethalPlugin.Log.LogInfo("Checking health regen");
             if (bool.Parse(SkillConfig.hostConfig["Health Regen Enabled"]))
             {
                 LethalPlugin.Log.LogInfo("HP Regen check 1");
@@ -68,14 +65,10 @@ namespace LethalProgression.Skills
                     1,
                     int.Parse(SkillConfig.hostConfig["Health Regen Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Health Regen Multiplier"], CultureInfo.InvariantCulture));
-                LethalPlugin.Log.LogInfo("HP Regen check 2");
-
             }
 
-            LethalPlugin.Log.LogInfo("Checking stamina");
             if (bool.Parse(SkillConfig.hostConfig["Stamina Enabled"]))
             {
-                LethalPlugin.Log.LogInfo("Stamina check 1");
                 CreateSkill(UpgradeType.Stamina,
                     "Stamina",
                     "The company gives you a better pair of lungs, allowing you to run for longer.",
@@ -86,13 +79,10 @@ namespace LethalProgression.Skills
                     int.Parse(SkillConfig.hostConfig["Stamina Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Stamina Multiplier"], CultureInfo.InvariantCulture),
                     Stamina.StaminaUpdate);
-                LethalPlugin.Log.LogInfo("Stamina check 2");
             }
 
-            LethalPlugin.Log.LogInfo("Checking battery");
             if (bool.Parse(SkillConfig.hostConfig["Battery Life Enabled"]))
             {
-                LethalPlugin.Log.LogInfo("Battery check 1");
                 CreateSkill(UpgradeType.Battery,
                     "Battery Life",
                     "You brought better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.",
@@ -102,13 +92,10 @@ namespace LethalProgression.Skills
                     1,
                     int.Parse(SkillConfig.hostConfig["Battery Life Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Battery Life Multiplier"], CultureInfo.InvariantCulture));
-                LethalPlugin.Log.LogInfo("Battery check 2");
             }
 
-            LethalPlugin.Log.LogInfo("Checking hand slots");
             if (bool.Parse(SkillConfig.hostConfig["Hand Slots Enabled"]) && !LethalPlugin.ReservedSlots)
             {
-                LethalPlugin.Log.LogInfo("Hand Slots check 1");
                 CreateSkill(UpgradeType.HandSlot,
                      "Hand Slot",
                      "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one more slot! 10 per slot.)",
@@ -119,13 +106,10 @@ namespace LethalProgression.Skills
                      int.Parse(SkillConfig.hostConfig["Hand Slots Max Level"]),
                      float.Parse(SkillConfig.hostConfig["Hand Slots Multiplier"], CultureInfo.InvariantCulture),
                      HandSlots.HandSlotsUpdate);
-                LethalPlugin.Log.LogInfo("Hand Slots check 2");
             }
 
-            LethalPlugin.Log.LogInfo("Checking loot value");
             if (bool.Parse(SkillConfig.hostConfig["Loot Value Enabled"]))
             {
-                LethalPlugin.Log.LogInfo("Loot Value check 1");
                 CreateSkill(UpgradeType.Value,
                     "Loot Value",
                     "The company gives you a better pair of eyes, allowing you to see the value in things.",
@@ -136,13 +120,10 @@ namespace LethalProgression.Skills
                     int.Parse(SkillConfig.hostConfig["Loot Value Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Loot Value Multiplier"], CultureInfo.InvariantCulture),
                     LootValue.LootValueUpdate);
-                LethalPlugin.Log.LogInfo("Loot Value check 2");
             }
 
-            LethalPlugin.Log.LogInfo("Checking oxygen");
             if (bool.Parse(SkillConfig.hostConfig["Oxygen Enabled"]))
             {
-                LethalPlugin.Log.LogInfo("Oxygen check 1");
                 CreateSkill(UpgradeType.Oxygen,
                     "Oxygen",
                     "The company gives you a better pair of lungs, allowing you to hold your breath for longer.",
@@ -152,7 +133,6 @@ namespace LethalProgression.Skills
                     1,
                     int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"], CultureInfo.InvariantCulture));
-                LethalPlugin.Log.LogInfo("Oxygen check 2");
             }
         }
     }

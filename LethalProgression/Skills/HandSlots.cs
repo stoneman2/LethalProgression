@@ -17,6 +17,12 @@ namespace LethalProgression.Skills
             if (LethalPlugin.ReservedSlots)
                 return;
 
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+                return;
+
+            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
+                return;
+
             XP xpInstance = LP_NetworkManager.xpInstance;
 
             float addedSlots = xpInstance.skillList.skills[UpgradeType.HandSlot].GetTrueValue() / 100;

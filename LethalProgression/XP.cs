@@ -238,7 +238,10 @@ namespace LethalProgression
                     {
                         //LethalPlugin.Log.LogInfo($"Setting slot {i}!");
                         if (objects.Count < newAmount)
+                        {
                             continue;
+                        }
+                        player.ItemSlots[i] = objects[i];
                     }
                     LethalPlugin.Log.LogInfo($"Player {playerID} has {player.ItemSlots.Length} slots after setting.");
                     break;
