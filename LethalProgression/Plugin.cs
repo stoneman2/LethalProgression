@@ -54,6 +54,24 @@ namespace LethalProgression
                 {
                     ReservedSlots = true;
                 }
+
+                if (plugin.Value.Metadata.GUID.IndexOf("mikestweaks") >= 0)
+                {
+                    // Get "ExtraItemSlots" config entry from Mike's Tweaks
+                    ConfigEntryBase[] mikesEntries = plugin.Value.Instance.Config.GetConfigEntries();
+
+                    foreach (var entry in mikesEntries)
+                    {
+                        if (entry.Definition.Key == "ExtraItemSlots")
+                        {
+                            if (int.Parse(entry.GetSerializedValue()) > 0)
+                            {
+                                ReservedSlots = true;
+                            }
+                            break;
+                        }
+                    }
+                }
             }
 
             // Network patcher!
