@@ -51,21 +51,6 @@ namespace LethalProgression.GUI
                     guiInstance.SetUnspec(false);
                 }
 
-                GameObject scrollRect = guiInstance.mainPanel.transform.GetChild(3).gameObject;
-                if (scrollRect.GetComponent<ScrollRect>().verticalNormalizedPosition >= 0.95f) // Scrolled near end
-                {
-                    guiInstance.mainPanel.transform.GetChild(4).gameObject.SetActive(true);
-                    guiInstance.mainPanel.transform.GetChild(5).gameObject.SetActive(false);
-                }
-                else if (scrollRect.GetComponent<ScrollRect>().verticalNormalizedPosition <= 0.05f) // At the top
-                {
-                    guiInstance.mainPanel.transform.GetChild(4).gameObject.SetActive(false);
-                    guiInstance.mainPanel.transform.GetChild(5).gameObject.SetActive(true);
-                }
-                else
-                {
-                    guiInstance.mainPanel.transform.GetChild(4).gameObject.SetActive(false);
-                }
                 // Get mouse position.
                 Vector2 mousePos = Mouse.current.position.ReadValue();
                 // If the mouse is currently on the PointsPanel
@@ -154,7 +139,7 @@ namespace LethalProgression.GUI
             infoPanel = mainPanel.transform.GetChild(1).gameObject;
             infoPanel.SetActive(false);
 
-            GameObject backButton = mainPanel.transform.GetChild(6).gameObject;
+            GameObject backButton = mainPanel.transform.GetChild(4).gameObject;
             backButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
             backButton.GetComponent<Button>().onClick.AddListener(BackButton);
 
@@ -221,7 +206,7 @@ namespace LethalProgression.GUI
             button.name = skill.GetShortName();
 
             GameObject skillScroller = mainPanel.transform.GetChild(3).gameObject;
-            GameObject skillContents = skillScroller.transform.GetChild(0).gameObject;
+            GameObject skillContents = skillScroller.transform.GetChild(1).gameObject;
             button.transform.SetParent(skillContents.transform, false);
 
             shownSkills++;
