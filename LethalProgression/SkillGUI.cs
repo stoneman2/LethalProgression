@@ -277,7 +277,7 @@ namespace LethalProgression.GUI
             {
                 upgradeAmt.SetText($"{skill.GetLevel()} / {skill.GetMaxLevel()}");
             }
-            upgradeAmt.SetText(skill.GetLevel().ToString());
+            //upgradeAmt.SetText(skill.GetLevel().ToString());
             upgradeDesc.SetText(skill.GetDescription());
 
             // Make all the buttons do something:

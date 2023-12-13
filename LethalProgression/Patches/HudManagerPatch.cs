@@ -113,7 +113,7 @@ namespace LethalProgression.Patches
         {
             levelText = GameObject.Instantiate(LethalPlugin.skillBundle.LoadAsset<GameObject>("LevelUp"));
 
-            levelText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Level Up! Spend your skill points. You have " + LP_NetworkManager.xpInstance.GetSkillPoints() + ".";
+            levelText.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "Level Up! Spend your skill points.";
 
             // Make this not active
             levelText.gameObject.SetActive(false);

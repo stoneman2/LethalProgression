@@ -58,7 +58,7 @@ namespace LethalProgression.Skills
                 LethalPlugin.Log.LogInfo("HP Regen check 1");
                 CreateSkill(UpgradeType.HPRegen,
                     "Health Regen",
-                    "Your body heals itself faster, allowing you to recover from injuries quicker. Only regenerate up to 100 HP.",
+                    "The company installs a basic healer into your suit, letting you regenerate health slowly. Only regenerate up to 100 HP.",
                     "HPR",
                     "Health Regeneration",
                     UpgradeType.HPRegen,
@@ -71,7 +71,7 @@ namespace LethalProgression.Skills
             {
                 CreateSkill(UpgradeType.Stamina,
                     "Stamina",
-                    "The company gives you a better pair of lungs, allowing you to run for longer.",
+                    "Hours on that company gym finally coming into play. Allows you to run for longer.",
                     "STM",
                     "Stamina",
                     UpgradeType.Stamina,
@@ -85,7 +85,7 @@ namespace LethalProgression.Skills
             {
                 CreateSkill(UpgradeType.Battery,
                     "Battery Life",
-                    "You brought better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.",
+                    "The company provides you with better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.",
                     "BAT",
                     "Battery Life",
                     UpgradeType.Battery,
@@ -98,7 +98,7 @@ namespace LethalProgression.Skills
             {
                 CreateSkill(UpgradeType.HandSlot,
                      "Hand Slot",
-                     "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one more slot! 10 per slot.)",
+                     "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one slot.)",
                      "HND",
                      "Hand Slots",
                      UpgradeType.HandSlot,
@@ -126,9 +126,9 @@ namespace LethalProgression.Skills
             {
                 CreateSkill(UpgradeType.Oxygen,
                     "Oxygen",
-                    "The company gives you a better pair of lungs, allowing you to hold your breath for longer.",
+                    "The company installs you with oxygen tanks. You gain extra time in the water. (Start drowning when the bar is empty.)",
                     "OXY",
-                    "Oxygen",
+                    "Extra Oxygen",
                     UpgradeType.Oxygen,
                     1,
                     int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
