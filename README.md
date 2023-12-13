@@ -33,7 +33,7 @@
 - This mod does not work with Lethal Experience. Uninstall it or this will not function.
 
 ## Credits:
-- sadamazon for the updated logo!
+- Dat1Mew for the updated logo!
 - daisuu.__ for bug-testing!
 
 # Installation
