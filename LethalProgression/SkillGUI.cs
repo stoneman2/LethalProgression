@@ -33,7 +33,7 @@ namespace LethalProgression.GUI
             if (isMenuOpen)
             {
 
-                if (bool.Parse(SkillConfig.hostConfig["Unspec in Ship Only"]))
+                if (bool.Parse(SkillConfig.hostConfig["Unspec in Ship Only"]) && !bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
                 {
                     // Check if you are in the ship right now
                     if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
@@ -45,6 +45,12 @@ namespace LethalProgression.GUI
                         guiInstance.SetUnspec(false);
                     }
                 }
+
+                if (bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
+                {
+                    guiInstance.SetUnspec(false);
+                }
+
                 GameObject scrollRect = guiInstance.mainPanel.transform.GetChild(3).gameObject;
                 if (scrollRect.GetComponent<ScrollRect>().verticalNormalizedPosition >= 0.95f) // Scrolled near end
                 {
@@ -194,8 +200,12 @@ namespace LethalProgression.GUI
             minusFive.SetActive(show);
             minusTwo.SetActive(show);
             minusOne.SetActive(show);
-            GameObject unSpecHelpText = infoPanel.transform.GetChild(9).gameObject;
-            unSpecHelpText.SetActive(!show);
+
+            if (!bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
+            {
+                GameObject unSpecHelpText = infoPanel.transform.GetChild(9).gameObject;
+                unSpecHelpText.SetActive(!show);
+            }
         }
         public GameObject SetupUpgradeButton(LethalProgression.Skills.Skill skill)
         {

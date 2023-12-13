@@ -9,6 +9,7 @@ using LethalProgression.GUI;
 
 namespace LethalProgression.Patches
 {
+    [HarmonyPatch]
     internal class XPPatches
     {
         [HarmonyPostfix]

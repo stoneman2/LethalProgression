@@ -42,6 +42,12 @@ namespace LethalProgression.Config
                 true,
                 "Disallows unspecing stats if you're not currently on the ship."
                 );
+            LethalPlugin.Instance.BindConfig<bool>(
+                "General",
+                "Disable Unspec",
+                false,
+                "Disallows unspecing altogether."
+                );
 
             // Skill Configs
             LethalPlugin.Instance.BindConfig<bool>(
