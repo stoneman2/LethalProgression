@@ -28,5 +28,12 @@ namespace LethalProgression.Saving
             string data = JsonConvert.SerializeObject(saveData);
             LP_NetworkManager.xpInstance.SaveData_ServerRpc(GameNetworkManager.Instance.localPlayerController.playerSteamId, data);
         }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(DeleteFileButton), "DeleteFile")]
+        private static void DeleteSaveFile(DeleteFileButton __instance)
+        {
+            SaveManager.DeleteSave(__instance.fileToDelete);
+        }
     }
 }

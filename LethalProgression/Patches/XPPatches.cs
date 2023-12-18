@@ -45,7 +45,6 @@ namespace LethalProgression.Patches
                 skill.SetLevel(0);
             }
 
-
             xpInstance.SetSkillPoints(5);
             xpInstance.xpLevel.Value = 0;
             xpInstance.xpPoints.Value = 0;

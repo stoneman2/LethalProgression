@@ -341,7 +341,7 @@ namespace LethalProgression
                 guiObj = new SkillsGUI();
                 teamLootValue.OnValueChanged += guiObj.TeamLootHudUpdate;
 
-                //skillPoints = xpLevel.Value + 5;
+                skillPoints = xpLevel.Value + 5;
 
                 GetEveryoneHandSlots_ServerRpc();
 

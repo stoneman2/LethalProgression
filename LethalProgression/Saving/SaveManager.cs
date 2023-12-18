@@ -39,6 +39,16 @@ namespace LethalProgression.Saving
             File.WriteAllText(GetSavePath() + "shared.json", JsonConvert.SerializeObject(new SaveSharedData(xp, level, quota)));
         }
 
+        public static void DeleteSave(int _saveFileSlot)
+        {
+            saveFileSlot = _saveFileSlot;
+            // Delete entire folder
+            if (Directory.Exists(GetSavePath()))
+            {
+                Directory.Delete(Application.persistentDataPath + "/lethalprogression/save" + (saveFileSlot + 1), true);
+            }
+        }
+
         public static string GetSavePath()
         {
             return Application.persistentDataPath + "/lethalprogression/save" + (saveFileSlot + 1) + "/";
