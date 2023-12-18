@@ -18,6 +18,8 @@ namespace LethalProgression.Skills
         HandSlot,
         Value,
         Oxygen,
+        JumpHeight,
+        SprintSpeed,
     }
 
     internal class SkillList
@@ -49,6 +51,21 @@ namespace LethalProgression.Skills
             }
 
             return true;
+        }
+
+        public Skill GetSkill(UpgradeType upgrade)
+        {
+            if (!IsSkillValid(upgrade))
+            {
+                return null;
+            }
+
+            return skills[upgrade];
+        }
+
+        public Dictionary<UpgradeType, Skill> GetSkills()
+        {
+            return skills;
         }
 
         public void InitializeSkills()
@@ -134,6 +151,34 @@ namespace LethalProgression.Skills
                     int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"], CultureInfo.InvariantCulture));
             }
+
+            if (bool.Parse(SkillConfig.hostConfig["Jump Height Enabled"]))
+            {
+                CreateSkill(UpgradeType.JumpHeight,
+                    "Jump Height",
+                    "The company installs you with jumping boots! (The company is not responsible for any broken knees.)",
+                    "JMP",
+                    "Jump Height",
+                    UpgradeType.JumpHeight,
+                    1,
+                    int.Parse(SkillConfig.hostConfig["Jump Height Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Jump Height Multiplier"], CultureInfo.InvariantCulture),
+                    JumpHeight.JumpHeightUpdate);
+            }
+
+            if (bool.Parse(SkillConfig.hostConfig["Sprint Speed Enabled"]))
+            {
+                CreateSkill(UpgradeType.SprintSpeed,
+                    "Sprint Speed",
+                    "The company empowers you with pure steroids, run, spaceman.",
+                    "SPD",
+                    "Sprint Speed",
+                    UpgradeType.SprintSpeed,
+                    1,
+                    int.Parse(SkillConfig.hostConfig["Sprint Speed Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Sprint Speed Multiplier"], CultureInfo.InvariantCulture),
+                    SprintSpeed.SprintSpeedUpdate);
+            }
         }
     }
 
@@ -215,9 +260,12 @@ namespace LethalProgression.Skills
             return _multiplier * _level;
         }
 
-        public void SetLevel(int level)
+        public void SetLevel(int newLevel)
         {
-            _level = level;
+            _level = newLevel;
+            // level is number of changes
+            int changes = newLevel - _level;
+            _callback?.Invoke(changes, newLevel);
         }
 
         public void AddLevel(int level)

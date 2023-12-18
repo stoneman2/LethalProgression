@@ -148,14 +148,14 @@ namespace LethalProgression.Config
             LethalPlugin.Instance.BindConfig<int>(
                 "Skills",
                 "Loot Value Max Level",
-                99999,
+                250,
                 "Maximum level for the loot value."
                 );
 
             LethalPlugin.Instance.BindConfig<float>(
                 "Skills",
                 "Loot Value Multiplier",
-                0.25f,
+                0.1f,
                 "How much does the loot value skill increase per level?"
                 );
 
@@ -179,6 +179,48 @@ namespace LethalProgression.Config
                 "Oxygen Multiplier",
                 1f,
                 "How much does the Oxygen skill increase per level?"
+                );
+            //
+            LethalPlugin.Instance.BindConfig<bool>(
+                "Skills",
+                "Jump Height Enabled",
+                true,
+                "Enable the Jump Height skill?"
+                );
+
+            LethalPlugin.Instance.BindConfig<int>(
+                "Skills",
+                "Jump Height Max Level",
+                99999,
+                "Maximum level for Jump Height."
+                );
+
+            LethalPlugin.Instance.BindConfig<float>(
+                "Skills",
+                "Jump Height Multiplier",
+                3f,
+                "How much does the Jump Height skill increase per level?"
+                );
+            //
+            LethalPlugin.Instance.BindConfig<bool>(
+                "Skills",
+                "Sprint Speed Enabled",
+                true,
+                "Enable the Sprint Speed skill?"
+                );
+
+            LethalPlugin.Instance.BindConfig<int>(
+                "Skills",
+                "Sprint Speed Max Level",
+                99999,
+                "Maximum level for Sprint Speed."
+                );
+
+            LethalPlugin.Instance.BindConfig<float>(
+                "Skills",
+                "Sprint Speed Multiplier",
+                0.25f,
+                "How much does the Sprint Speed skill increase per level?"
                 );
         }
     }

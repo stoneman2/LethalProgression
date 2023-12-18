@@ -14,7 +14,9 @@ using LethalProgression.Config;
 using LethalProgression.Skills;
 using LethalProgression.GUI;
 using LethalProgression.Patches;
+using LethalProgression.Saving;
 using Newtonsoft.Json;
+using Steamworks;
 
 namespace LethalProgression
 {
@@ -32,39 +34,65 @@ namespace LethalProgression
         public SkillList skillList;
         public SkillsGUI guiObj;
         public bool Initialized = false;
+        public bool loadedSave = false;
         public void Start()
         {
             LethalPlugin.Log.LogInfo("XP Network Behavior Made!");
             PlayerConnect_ServerRpc();
         }
-        public void LoadSaveData()
+        public void LoadSharedData()
         {
-            int savefileNum = GameNetworkManager.Instance.saveFileNum + 1;
-            string path = Application.persistentDataPath + "/lethalprogression/save" + savefileNum + ".txt";
-            if (!System.IO.File.Exists(path))
+            SaveSharedData sharedData = SaveManager.LoadShared();
+
+            if (sharedData == null)
             {
-                // Make directory and empty file.
-                System.IO.Directory.CreateDirectory(Application.persistentDataPath + "/lethalprogression");
-                System.IO.File.WriteAllText(path, "");
-
-                string xpBuild = "";
-                xpBuild += "0\n";
-                xpBuild += "0\n";
-                xpBuild += "0\n";
-
-                System.IO.File.WriteAllText(path, xpBuild);
-
+                LethalPlugin.Log.LogInfo("Shared data is null!");
+                return;
             }
-
-            string[] lines = System.IO.File.ReadAllLines(path);
-
-            LethalPlugin.Log.LogError("Loading XP!");
-            xpLevel.Value = int.Parse(lines[0]);
-            xpPoints.Value = int.Parse(lines[1]);
-            profit.Value = int.Parse(lines[2]);
+            LethalPlugin.Log.LogInfo("Loading XP!");
+            xpLevel.Value = sharedData.level;
+            xpPoints.Value = sharedData.xp;
+            profit.Value = sharedData.quota;
             xpReq.Value = GetXPRequirement();
 
             LethalPlugin.Log.LogInfo(GetXPRequirement().ToString());
+        }
+        public void LoadLocalData(string data)
+        {
+            if (loadedSave)
+            {
+                return;
+            }
+
+            loadedSave = true;
+            LethalPlugin.Log.LogInfo("Loading local XP!");
+            SaveData saveData = JsonConvert.DeserializeObject<SaveData>(data);
+            skillPoints = saveData.skillPoints;
+
+            int skillCheck = 0;
+            foreach (KeyValuePair<UpgradeType, int> skill in saveData.skillAllocation)
+            {
+                skillList.skills[skill.Key].AddLevel(skill.Value);
+                skillCheck += skill.Value;
+            }
+            LethalPlugin.Log.LogInfo(GetXPRequirement().ToString());
+
+            // Sanity check: If skillCheck goes over amount of skill points, reset all skills.
+            //if (skillCheck > skillPoints)
+            //{
+            //    LethalPlugin.Log.LogInfo("Skill check is greater than skill points, resetting skills.");
+            //    foreach (KeyValuePair<UpgradeType, Skill> skill in skillList.skills)
+            //    {
+            //        skill.Value.Reset();
+            //    }
+            //}
+
+            // if the skill check is less than the current level plus five, add the difference
+            if ((skillCheck + skillPoints) < xpLevel.Value + 5)
+            {
+                LethalPlugin.Log.LogInfo($"Skill check is less than current level, adding {((xpLevel.Value + 5) - (skillCheck + skillPoints))} skill points.");
+                skillPoints += (xpLevel.Value + 5) - (skillCheck + skillPoints);
+            }
         }
         public int GetXPRequirement()
         {
@@ -305,21 +333,47 @@ namespace LethalProgression
                 skillList = new SkillList();
                 skillList.InitializeSkills();
 
-                guiObj = new SkillsGUI();
-
-                teamLootValue.OnValueChanged += guiObj.TeamLootHudUpdate;
-
                 if (GameNetworkManager.Instance.isHostingGame)
                 {
-                    LoadSaveData();
+                    LoadSharedData();
                 }
 
-                skillPoints = xpLevel.Value + 5;
+                guiObj = new SkillsGUI();
+                teamLootValue.OnValueChanged += guiObj.TeamLootHudUpdate;
+
+                //skillPoints = xpLevel.Value + 5;
 
                 GetEveryoneHandSlots_ServerRpc();
 
                 ChangeXPRequirement_ServerRpc();
             }
+        }
+
+        // Saving
+        [ServerRpc (RequireOwnership = false)]
+        public void SaveData_ServerRpc(ulong steamID, string saveData)
+        {
+            SaveManager.Save(steamID, saveData);
+            SaveManager.SaveShared(xpPoints.Value, xpLevel.Value, profit.Value);
+        }
+
+        // Loading
+        [ServerRpc(RequireOwnership = false)]
+        public void RequestSavedData_ServerRpc(ulong steamID)
+        {
+            string saveData = SaveManager.Load(steamID);
+            SendSavedData_ClientRpc(saveData);
+        }
+
+        [ClientRpc]
+        public void SendSavedData_ClientRpc(string saveData)
+        {
+            if (saveData == null)
+            {
+                return;
+            }
+
+            LoadLocalData(saveData);
         }
     }
 }

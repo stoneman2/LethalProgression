@@ -243,6 +243,17 @@ namespace LethalProgression.GUI
             skillButton.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
         }
 
+        public void UpdateAllStats()
+        {
+            foreach (KeyValuePair<UpgradeType, Skill> skill in LP_NetworkManager.xpInstance.skillList.skills)
+            {
+                if (skill.Value._teamShared)
+                    continue;
+                GameObject skillButton = skillButtonsList.Find(x => x.name == skill.Value.GetShortName());
+                LoadSkillData(skill.Value, skillButton);
+            }
+        }
+
         public void UpdateStatInfo(Skill skill)
         {
             if (!infoPanel.activeSelf)

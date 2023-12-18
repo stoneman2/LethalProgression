@@ -19,7 +19,9 @@ namespace LethalProgression.Skills
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Value))
                 return;
 
-            RoundManager.Instance.scrapValueMultiplier = RoundManager.Instance.scrapValueMultiplier + (LP_NetworkManager.xpInstance.teamLootValue.Value / 100);
+            float scrapValueAdded = (LP_NetworkManager.xpInstance.teamLootValue.Value / 100);
+            // Every time, set it to the default value, then add the multiplier.
+            RoundManager.Instance.scrapValueMultiplier = 1f + scrapValueAdded;
         }
 
         public static void LootValueUpdate(int change, int newLevel)

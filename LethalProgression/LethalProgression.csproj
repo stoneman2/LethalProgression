@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
@@ -21,10 +21,11 @@
     </ItemGroup>
 
     <ItemGroup>
+	  <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1" PrivateAssets="all" />
       <Reference Include="0Harmony">
         <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\BepInEx\core\0Harmony.dll</HintPath>
       </Reference>
-      <Reference Include="Assembly-CSharp">
+      <Reference Include="Assembly-CSharp" Publicize="true">
         <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Assembly-CSharp.dll</HintPath>
       </Reference>
       <Reference Include="BepInEx">
@@ -32,6 +33,9 @@
       </Reference>
       <Reference Include="ClientNetworkTransform">
         <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data\Managed\ClientNetworkTransform.dll</HintPath>
+      </Reference>
+      <Reference Include="Facepunch.Steamworks.Win64">
+        <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
       </Reference>
       <Reference Include="HarmonyXInterop">
         <HintPath>..\..\..\..\SteamLibrary\steamapps\common\Lethal Company\BepInEx\core\HarmonyXInterop.dll</HintPath>
@@ -90,6 +94,6 @@
     </ItemGroup>
 
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="cd D:\Lethal_Modding\NetcodePatcher-2.1.0&#xD;&#xA;NetcodePatcher.dll $(TargetDir) deps/" />
+      <Exec Command="cd D:\Lethal_Modding\NetcodePatcher-2.1.0&#xD;&#xA;NetcodePatcher.dll $(TargetDir) deps/&#xD;&#xA;&#xD;&#xA;copy /y &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Lethal Company\BepInEx\plugins&quot;&#xD;&#xA;echo &quot;Copied from $(TargetPath).&quot;" />
     </Target>
 </Project>

@@ -6,36 +6,14 @@ using System.Text;
 using UnityEngine;
 using Unity.Netcode;
 using LethalProgression.GUI;
+using Steamworks;
+using GameNetcodeStuff;
 
 namespace LethalProgression.Patches
 {
     [HarmonyPatch]
     internal class XPPatches
     {
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameNetworkManager), "SaveGameValues")]
-        private static void SaveXPValues(GameNetworkManager __instance)
-        {
-            if (!GameNetworkManager.Instance.isHostingGame)
-            {
-                return;
-            }
-            if (!StartOfRound.Instance.inShipPhase)
-            {
-                return;
-            }
-            // We don't care about the version number. If we disconnect, we want to save our XP.
-            // Make a new file.
-            int saveFileNum = __instance.saveFileNum + 1;
-            string path = Application.persistentDataPath + "/lethalprogression/save" + saveFileNum + ".txt";
-
-            string xpBuild = "";
-            xpBuild += LP_NetworkManager.xpInstance.GetLevel() + "\n";
-            xpBuild += LP_NetworkManager.xpInstance.GetXP() + "\n";
-            xpBuild += LP_NetworkManager.xpInstance.GetProfit() + "\n";
-            System.IO.File.WriteAllText(path, xpBuild);
-        }
-
         [HarmonyPostfix]
         [HarmonyPatch(typeof(StartOfRound), "FirePlayersAfterDeadlineClientRpc")]
         private static void ResetXPValues(StartOfRound __instance)
@@ -104,10 +82,27 @@ namespace LethalProgression.Patches
         [HarmonyPatch(typeof(GameNetworkManager), "Disconnect")]
         private static void DisconnectXPHandler()
         {
-            int lootLevel = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.HandSlot].GetLevel();
-            LP_NetworkManager.xpInstance.TeamLootValueUpdate(-lootLevel, 0);
+            if (LP_NetworkManager.xpInstance.skillList.GetSkill(UpgradeType.Value).GetLevel() != 0)
+            {
+                int lootLevel = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value].GetLevel();
+                LP_NetworkManager.xpInstance.TeamLootValueUpdate(-lootLevel, 0);
+            }
+
+            SprintSpeed.sprintSpeed = 2.25f;
+            HandSlots.currentSlotCount = 4;
 
             GUIUpdate.isMenuOpen = false;
+        }
+
+        [HarmonyPostfix]
+        [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesClientRpc")]
+        private static void PlayerLoadedXPHandler(StartOfRound __instance)
+        {
+            ulong steamID = SteamClient.SteamId;
+            LethalPlugin.Log.LogInfo($"Player {steamID} has joined the game.");
+            LP_NetworkManager.xpInstance.RequestSavedData_ServerRpc(steamID);
+
+            LP_NetworkManager.xpInstance.guiObj.UpdateAllStats();
         }
 
         [HarmonyPostfix]
