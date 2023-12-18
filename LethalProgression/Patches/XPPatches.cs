@@ -8,6 +8,7 @@ using Unity.Netcode;
 using LethalProgression.GUI;
 using Steamworks;
 using GameNetcodeStuff;
+using LethalProgression.Saving;
 
 namespace LethalProgression.Patches
 {
@@ -20,24 +21,7 @@ namespace LethalProgression.Patches
         {
             var xpInstance = LP_NetworkManager.xpInstance;
             int saveFileNum = GameNetworkManager.Instance.saveFileNum + 1;
-            string path = Application.persistentDataPath + "/lethalprogression/save" + saveFileNum + ".txt";
-
-            // Delete the file.
-            if (System.IO.File.Exists(path))
-            {
-                System.IO.File.Delete(path);
-            }
-
-            // Make a new file.
-            System.IO.Directory.CreateDirectory(Application.persistentDataPath + "/lethalprogression");
-            System.IO.File.WriteAllText(path, "");
-
-            string xpBuild = "";
-            xpBuild += "0\n";
-            xpBuild += "0\n";
-            xpBuild += "0\n";
-
-            System.IO.File.WriteAllText(path, xpBuild);
+            SaveManager.DeleteSave(saveFileNum);
 
             xpInstance.xpReq.Value = xpInstance.GetXPRequirement();
             foreach (Skill skill in xpInstance.skillList.skills.Values)
@@ -50,31 +34,6 @@ namespace LethalProgression.Patches
             xpInstance.xpPoints.Value = 0;
             xpInstance.profit.Value = 0;
             xpInstance.teamLootValue.Value = 0;
-        }
-
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(DeleteFileButton), "DeleteFile")]
-        private static void XPFileDeleteReset()
-        {
-            int saveFileNum = GameNetworkManager.Instance.saveFileNum + 1;
-            string path = Application.persistentDataPath + "/lethalprogression/save" + saveFileNum + ".txt";
-
-            // Delete the file.
-            if (System.IO.File.Exists(path))
-            {
-                System.IO.File.Delete(path);
-            }
-
-            // Make a new file.
-            System.IO.Directory.CreateDirectory(Application.persistentDataPath + "/lethalprogression");
-            System.IO.File.WriteAllText(path, "");
-
-            string xpBuild = "";
-            xpBuild += "0\n";
-            xpBuild += "0\n";
-            xpBuild += "0\n";
-
-            System.IO.File.WriteAllText(path, xpBuild);
         }
 
         [HarmonyPostfix]
