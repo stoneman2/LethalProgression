@@ -39,8 +39,14 @@ namespace LethalProgression.Config
             LethalPlugin.Instance.BindConfig<bool>(
                 "General",
                 "Unspec in Ship Only",
-                true,
+                false,
                 "Disallows unspecing stats if you're not currently on the ship."
+                );
+            LethalPlugin.Instance.BindConfig<bool>(
+                "General",
+                "Unspec in Orbit Only",
+                true,
+                "Disallows unspecing stats if you're not currently in orbit."
                 );
             LethalPlugin.Instance.BindConfig<bool>(
                 "General",

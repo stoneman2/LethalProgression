@@ -46,6 +46,19 @@ namespace LethalProgression.GUI
                     }
                 }
 
+                if (bool.Parse(SkillConfig.hostConfig["Unspec in Orbit Only"]))
+                {
+                    // Check if you are in orbit right now
+                    if (StartOfRound.Instance.inShipPhase)
+                    {
+                        guiInstance.SetUnspec(true);
+                    }
+                    else
+                    {
+                        guiInstance.SetUnspec(false);
+                    }
+                }
+
                 if (bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
                 {
                     guiInstance.SetUnspec(false);
@@ -190,6 +203,12 @@ namespace LethalProgression.GUI
             {
                 GameObject unSpecHelpText = infoPanel.transform.GetChild(9).gameObject;
                 unSpecHelpText.SetActive(!show);
+            }
+
+            if (bool.Parse(SkillConfig.hostConfig["Unspec in Orbit Only"]))
+            {
+                GameObject unSpecHelpText = infoPanel.transform.GetChild(9).gameObject;
+                unSpecHelpText.transform.GetComponent<TextMeshProUGUI>().SetText("Return to orbit to unspec.");
             }
         }
         public GameObject SetupUpgradeButton(LethalProgression.Skills.Skill skill)
