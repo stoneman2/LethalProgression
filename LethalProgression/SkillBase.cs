@@ -166,7 +166,7 @@ namespace LethalProgression.Skills
                     JumpHeight.JumpHeightUpdate);
             }
 
-            if (bool.Parse(SkillConfig.hostConfig["Sprint Speed Enabled"]))
+            if (!LethalPlugin.MikesTweaks && bool.Parse(SkillConfig.hostConfig["Sprint Speed Enabled"]))
             {
                 CreateSkill(UpgradeType.SprintSpeed,
                     "Sprint Speed",
@@ -195,7 +195,9 @@ namespace LethalProgression.Skills
         private readonly Action<int, int> _callback;
         public bool _teamShared;
         private int _level;
-        public Skill(string name, string description, string shortname, string attribute, UpgradeType upgradeType, int cost, int maxLevel, float multiplier, Action<int, int> callback = null, bool teamShared = false)
+        public Skill(string name, string description, string shortname, string attribute,
+            UpgradeType upgradeType, int cost, int maxLevel, float multiplier,
+            Action<int, int> callback = null, bool teamShared = false)
         {
             _name = name;
             _shortName = shortname;

@@ -17,10 +17,11 @@ using LethalProgression.Patches;
 using LethalProgression.Saving;
 using Newtonsoft.Json;
 using Steamworks;
+using System.Linq;
 
 namespace LethalProgression
 {
-    internal class XP : NetworkBehaviour
+    internal class LC_XP : NetworkBehaviour
     {
         public NetworkVariable<int> xpPoints = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
         public NetworkVariable<int> xpLevel = new NetworkVariable<int>(0, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -239,18 +240,19 @@ namespace LethalProgression
 
         // When updates.
         [ServerRpc(RequireOwnership = false)]
-        public void ServerHandSlots_ServerRpc(ulong playerID, int newSlots)
+        public void ServerHandSlots_ServerRpc(ulong playerID, int slotChange)
         {
             if (LethalPlugin.ReservedSlots)
                 return;
 
-            SetPlayerHandslots_ClientRpc(playerID, newSlots);
+            // Send the request to all clients
+            SetPlayerHandslots_ClientRpc(playerID, slotChange);
         }
 
         [ClientRpc]
-        public void SetPlayerHandslots_ClientRpc(ulong playerID, int newSlots)
+        public void SetPlayerHandslots_ClientRpc(ulong playerID, int slotChange)
         {
-            SetHandSlot(playerID, newSlots);
+            SetHandSlot(playerID, slotChange);
         }
 
         public void SetHandSlot(ulong playerID, int newSlots)
@@ -260,18 +262,42 @@ namespace LethalProgression
                 if (player.playerClientId == playerID)
                 {
                     int newAmount = 4 + newSlots;
-                    List<GrabbableObject> objects = new List<GrabbableObject>(player.ItemSlots);
-                    player.ItemSlots = new GrabbableObject[newAmount];
-                    for (int i = 0; i < newAmount; i++)
+                    List<GrabbableObject> objects = player.ItemSlots.ToList<GrabbableObject>();
+
+                    if (player.currentItemSlot > newAmount - 1)
                     {
-                        //LethalPlugin.Log.LogInfo($"Setting slot {i}!");
-                        if (objects.Count < newAmount)
+                        HandSlots.SwitchItemSlots(player, newAmount - 1);
+                    }
+
+                    for (int i = 0; i < objects.Count; i++)
+                    {
+                        if (i > newAmount - 1)
+                        {
+                            // In a slot that is getting removed, drop it instead
+                            if (objects[i] != null)
+                            {
+                                HandSlots.SwitchItemSlots(player, i);
+                                player.DiscardHeldObject();
+                            }
+                        }
+                    }
+
+                    player.ItemSlots = new GrabbableObject[newAmount];
+                    for (int i = 0; i < objects.Count; i++)
+                    {
+                        if (objects[i] == null)
                         {
                             continue;
                         }
                         player.ItemSlots[i] = objects[i];
                     }
-                    LethalPlugin.Log.LogInfo($"Player {playerID} has {player.ItemSlots.Length} slots after setting.");
+                    LethalPlugin.Log.LogDebug($"Player {playerID} has {player.ItemSlots.Length} slots after setting.");
+
+                    if (player == GameNetworkManager.Instance.localPlayerController)
+                    {
+                        LethalPlugin.Log.LogDebug($"Updating HUD slots.");
+                        HandSlots.UpdateHudSlots();
+                    }
                     break;
                 }
             }

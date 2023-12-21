@@ -20,17 +20,18 @@ using Unity.Netcode;
 
 namespace LethalProgression
 {
-    [BepInPlugin("Stoneman.LethalProgression", "Lethal Progression", "1.3.2")]
+    [BepInPlugin("Stoneman.LethalProgression", "Lethal Progression", "1.4.0")]
     internal class LethalPlugin : BaseUnityPlugin
     {
         private const string modGUID = "Stoneman.LethalProgression";
         private const string modName = "Lethal Progression";
-        private const string modVersion = "1.3.2";
+        private const string modVersion = "1.4.0";
         private const string modAuthor = "Stoneman";
         public static AssetBundle skillBundle;
 
         internal static ManualLogSource Log;
         internal static bool ReservedSlots;
+        internal static bool MikesTweaks;
         public static LethalPlugin Instance { get; private set; }
 
         private void Awake()
@@ -58,6 +59,8 @@ namespace LethalProgression
                     // Get "ExtraItemSlots" config entry from Mike's Tweaks
                     ConfigEntryBase[] mikesEntries = plugin.Value.Instance.Config.GetConfigEntries();
 
+                    MikesTweaks = true;
+
                     foreach (var entry in mikesEntries)
                     {
                         if (entry.Definition.Key == "ExtraItemSlots")
@@ -66,7 +69,6 @@ namespace LethalProgression
                             {
                                 ReservedSlots = true;
                             }
-                            break;
                         }
                     }
                 }

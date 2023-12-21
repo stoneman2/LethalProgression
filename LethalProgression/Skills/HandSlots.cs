@@ -23,13 +23,24 @@ namespace LethalProgression.Skills
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
                 return;
 
-            XP xpInstance = LP_NetworkManager.xpInstance;
+            LC_XP xpInstance = LP_NetworkManager.xpInstance;
 
+            int skillPercent = (int)xpInstance.skillList.skills[UpgradeType.HandSlot].GetTrueValue();
+            int slotsToAdd = (int)Math.Floor((double)(skillPercent / 100));
+
+            // Tell the server we've updated our hand slots.
+            ulong playerID = GameNetworkManager.Instance.localPlayerController.playerClientId;
+            xpInstance.ServerHandSlots_ServerRpc(playerID, slotsToAdd);
+        }
+
+        public static void UpdateHudSlots()
+        {
+            LC_XP xpInstance = LP_NetworkManager.xpInstance;
+
+            // Credit to Mike for this code! https://github.com/MikeS-MS/MikesTweaks/
             float addedSlots = xpInstance.skillList.skills[UpgradeType.HandSlot].GetTrueValue() / 100;
             int slotCount = 4 + (int)Math.Floor(addedSlots);
             int addedSlot = slotCount - currentSlotCount;
-
-            // Credit to Mike for this code! https://github.com/MikeS-MS/MikesTweaks/
 
             GameObject inventory = GameObject.Find("Systems/UI/Canvas/IngamePlayerHUD/Inventory");
             List<string> slotIgnore = new List<string>() { "Slot0", "Slot1", "Slot2", "Slot3" };
@@ -96,12 +107,51 @@ namespace LethalProgression.Skills
 
             HUDManager.Instance.itemSlotIconFrames = ItemSlotIconFrames;
             HUDManager.Instance.itemSlotIcons = ItemSlotIcons;
+        }
 
+        public static bool IsItemSwitchPossible(PlayerControllerB player)
+        {
+            return (double)player.timeSinceSwitchingSlots >= 0.01 &&
+                !player.inTerminalMenu && !player.isGrabbingObjectAnimation 
+                && !player.inSpecialInteractAnimation && !player.throwingObject 
+                && !player.isTypingChat && !player.twoHanded && !player.activatingItem 
+                && !player.jetpackControls && !player.disablingJetpackControls;
+        }
 
+        // Thanks @evaisa
+        public static bool SwitchItemSlots(PlayerControllerB player, int requestedSlot)
+        {
+            if (!IsItemSwitchPossible(player) || player.currentItemSlot == requestedSlot)
+            {
+                return false;
+            }
+            LethalPlugin.Log.LogDebug($"Trying to switch to slot {requestedSlot}");
 
-            // Tell the server we've updated our hand slots.
-            ulong playerID = GameNetworkManager.Instance.localPlayerController.playerClientId;
-            xpInstance.ServerHandSlots_ServerRpc(playerID, slotsToAdd);
+            int num = player.currentItemSlot - requestedSlot;
+            bool flag = num > 0;
+            if (Math.Abs(num) == player.ItemSlots.Length - 1)
+            {
+                player.SwitchItemSlotsServerRpc(flag);
+            }
+            else
+            {
+                do
+                {
+                    player.SwitchItemSlotsServerRpc(flag);
+                    num += (flag ? -1 : 1);
+                }
+                while (num != 0);
+            }
+            ShipBuildModeManager.Instance.CancelBuildMode(true);
+            player.playerBodyAnimator.SetBool("GrabValidated", false);
+            LethalPlugin.Log.LogDebug($"Switched to slot {requestedSlot}");
+
+            player.SwitchToItemSlot(requestedSlot, null);
+            if (player.currentlyHeldObjectServer != null)
+            {
+                player.currentlyHeldObjectServer.gameObject.GetComponent<AudioSource>().PlayOneShot(player.currentlyHeldObjectServer.itemProperties.grabSFX, 0.6f);
+            }
+            return true;
         }
     }
 }

@@ -10,10 +10,23 @@ namespace LethalProgression.Saving
     [HarmonyPatch]
     internal class SavePatches
     {
-        // Whenever a player disconnects, do save!
+        // Whenever game saves, do save!
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameNetworkManager), "SaveGame")]
+        private static void SaveGame(GameNetworkManager __instance)
+        {
+            DoSave();
+        }
+
+        // Whenever disconnect
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameNetworkManager), "Disconnect")]
-        private static void SaveGame(GameNetworkManager __instance)
+        private static void Disconnect(GameNetworkManager __instance)
+        {
+            DoSave();
+        }
+
+        public static void DoSave()
         {
             SaveData saveData = new SaveData();
             saveData.steamId = GameNetworkManager.Instance.localPlayerController.playerSteamId;

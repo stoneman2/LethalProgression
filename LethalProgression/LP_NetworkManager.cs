@@ -19,7 +19,7 @@ namespace LethalProgression
                 return;
 
             xpNetworkObject = (GameObject)LethalPlugin.skillBundle.LoadAsset("LP_XPHandler");
-            xpNetworkObject.AddComponent<XP>();
+            xpNetworkObject.AddComponent<LC_XP>();
             NetworkManager.Singleton.AddNetworkPrefab(xpNetworkObject);
         }
 
@@ -33,11 +33,11 @@ namespace LethalProgression
             {
                 var networkHandlerHost = Object.Instantiate(xpNetworkObject, Vector3.zero, Quaternion.identity);
                 networkHandlerHost.GetComponent<NetworkObject>().Spawn();
-                xpInstance = networkHandlerHost.GetComponent<XP>();
+                xpInstance = networkHandlerHost.GetComponent<LC_XP>();
                 LethalPlugin.Log.LogInfo("XPHandler Initialized.");
             }
         }
 
-        public static XP xpInstance;
+        public static LC_XP xpInstance;
     }
 }

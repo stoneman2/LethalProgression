@@ -228,7 +228,7 @@ namespace LethalProgression.GUI
             return button;
         }
 
-        public void LoadSkillData(LethalProgression.Skills.Skill skill, GameObject skillButton)
+        public void LoadSkillData(Skill skill, GameObject skillButton)
         {
             if (skill._teamShared)
                 return;
@@ -304,7 +304,7 @@ namespace LethalProgression.GUI
             minusOne.GetComponent<Button>().onClick.AddListener(delegate { RemoveSkillPoint(skill, 1); });
         }
 
-        public void AddSkillPoint(LethalProgression.Skills.Skill skill, int amt)
+        public void AddSkillPoint(Skill skill, int amt)
         {
             if (LP_NetworkManager.xpInstance.GetSkillPoints() <= 0)
             {

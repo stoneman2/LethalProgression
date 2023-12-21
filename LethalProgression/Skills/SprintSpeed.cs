@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
+using BepInEx.Bootstrap;
 using GameNetcodeStuff;
 using HarmonyLib;
+using BepInEx.Configuration;
 
 namespace LethalProgression.Skills
 {
@@ -36,6 +38,10 @@ namespace LethalProgression.Skills
         [HarmonyTranspiler]
         private static IEnumerable<CodeInstruction> Update_Transpiler(IEnumerable<CodeInstruction> instructions)
         {
+            // Don't run if mike's tweaks is installed
+            if (LethalPlugin.MikesTweaks)
+                return instructions;
+
             var codes = new List<CodeInstruction>(instructions);
 
             for (int i = 0; i < codes.Count; i++)
