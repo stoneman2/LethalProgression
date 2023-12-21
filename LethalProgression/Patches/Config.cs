@@ -228,6 +228,27 @@ namespace LethalProgression.Config
                 0.25f,
                 "How much does the Sprint Speed skill increase per level?"
                 );
+            //
+            LethalPlugin.Instance.BindConfig<bool>(
+                "Skills",
+                "Strength Enabled",
+                true,
+                "Enable the strength skill?"
+                );
+
+            LethalPlugin.Instance.BindConfig<int>(
+                "Skills",
+                "Strength Max Level",
+                75,
+                "Maximum level for Strength."
+                );
+
+            LethalPlugin.Instance.BindConfig<float>(
+                "Skills",
+                "Strength Multiplier",
+                1f,
+                "How much does the Strength skill increase per level?"
+                );
         }
     }
 }

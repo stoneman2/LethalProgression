@@ -20,15 +20,16 @@ namespace LethalProgression.Skills
         Oxygen,
         JumpHeight,
         SprintSpeed,
+        Strength
     }
 
     internal class SkillList
     {
         public Dictionary<UpgradeType, Skill> skills = new Dictionary<UpgradeType, Skill>();
 
-        public void CreateSkill(UpgradeType upgrade, string name, string description, string shortname, string attribute, UpgradeType upgradeType, int cost, int maxLevel, float multiplier, Action<int, int> callback = null, bool teamShared = false)
+        public void CreateSkill(UpgradeType upgrade, string name, string description, string shortname, string attribute, int cost, int maxLevel, float multiplier, Action<int, int> callback = null, bool teamShared = false)
         {
-            Skill newSkill = new Skill(name, description, shortname, attribute, upgradeType, cost, maxLevel, multiplier, callback, teamShared);
+            Skill newSkill = new Skill(name, description, shortname, attribute, upgrade, cost, maxLevel, multiplier, callback, teamShared);
             skills.Add(upgrade, newSkill);
         }
 
@@ -78,7 +79,6 @@ namespace LethalProgression.Skills
                     "The company installs a basic healer into your suit, letting you regenerate health slowly. Only regenerate up to 100 HP.",
                     "HPR",
                     "Health Regeneration",
-                    UpgradeType.HPRegen,
                     1,
                     int.Parse(SkillConfig.hostConfig["Health Regen Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Health Regen Multiplier"], CultureInfo.InvariantCulture));
@@ -88,10 +88,9 @@ namespace LethalProgression.Skills
             {
                 CreateSkill(UpgradeType.Stamina,
                     "Stamina",
-                    "Hours on that company gym finally coming into play. Allows you to run for longer.",
+                    "Hours on that company gym finally coming into play. Allows you to run for longer, but has to regenerate it slower.",
                     "STM",
                     "Stamina",
-                    UpgradeType.Stamina,
                     1,
                     int.Parse(SkillConfig.hostConfig["Stamina Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Stamina Multiplier"], CultureInfo.InvariantCulture),
@@ -105,7 +104,6 @@ namespace LethalProgression.Skills
                     "The company provides you with better batteries. Replace your batteries AT THE SHIP'S CHARGER to see an effect.",
                     "BAT",
                     "Battery Life",
-                    UpgradeType.Battery,
                     1,
                     int.Parse(SkillConfig.hostConfig["Battery Life Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Battery Life Multiplier"], CultureInfo.InvariantCulture));
@@ -115,10 +113,9 @@ namespace LethalProgression.Skills
             {
                 CreateSkill(UpgradeType.HandSlot,
                      "Hand Slot",
-                     "The company finally gives you a better belt! Fit more stuff! (Reach 100% for one slot.)",
+                     "The company finally gives you a better belt! Fit more stuff! (One slot every 100%.)",
                      "HND",
                      "Hand Slots",
-                     UpgradeType.HandSlot,
                      1,
                      int.Parse(SkillConfig.hostConfig["Hand Slots Max Level"]),
                      float.Parse(SkillConfig.hostConfig["Hand Slots Multiplier"], CultureInfo.InvariantCulture),
@@ -132,7 +129,6 @@ namespace LethalProgression.Skills
                     "The company gives you a better pair of eyes, allowing you to see the value in things.",
                     "VAL",
                     "Loot Value",
-                    UpgradeType.Value,
                     1,
                     int.Parse(SkillConfig.hostConfig["Loot Value Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Loot Value Multiplier"], CultureInfo.InvariantCulture),
@@ -146,10 +142,22 @@ namespace LethalProgression.Skills
                     "The company installs you with oxygen tanks. You gain extra time in the water. (Start drowning when the bar is empty.)",
                     "OXY",
                     "Extra Oxygen",
-                    UpgradeType.Oxygen,
                     1,
                     int.Parse(SkillConfig.hostConfig["Oxygen Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Oxygen Multiplier"], CultureInfo.InvariantCulture));
+            }
+
+            if (bool.Parse(SkillConfig.hostConfig["Strength Enabled"]))
+            {
+                CreateSkill(UpgradeType.Strength,
+                    "Strength",
+                    "More work at the Company's gym gives you pure muscles! You can carry better. (Reduces weight by a percentage.)",
+                    "STR",
+                    "Weight Reduction",
+                    1,
+                    int.Parse(SkillConfig.hostConfig["Strength Max Level"]),
+                    float.Parse(SkillConfig.hostConfig["Strength Multiplier"], CultureInfo.InvariantCulture),
+                    Strength.StrengthUpdate);
             }
 
             if (bool.Parse(SkillConfig.hostConfig["Jump Height Enabled"]))
@@ -159,7 +167,6 @@ namespace LethalProgression.Skills
                     "The company installs you with jumping boots! (The company is not responsible for any broken knees.)",
                     "JMP",
                     "Jump Height",
-                    UpgradeType.JumpHeight,
                     1,
                     int.Parse(SkillConfig.hostConfig["Jump Height Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Jump Height Multiplier"], CultureInfo.InvariantCulture),
@@ -173,7 +180,6 @@ namespace LethalProgression.Skills
                     "The company empowers you with pure steroids, run, spaceman.",
                     "SPD",
                     "Sprint Speed",
-                    UpgradeType.SprintSpeed,
                     1,
                     int.Parse(SkillConfig.hostConfig["Sprint Speed Max Level"]),
                     float.Parse(SkillConfig.hostConfig["Sprint Speed Multiplier"], CultureInfo.InvariantCulture),
@@ -270,12 +276,12 @@ namespace LethalProgression.Skills
             _callback?.Invoke(changes, newLevel);
         }
 
-        public void AddLevel(int level)
+        public void AddLevel(int change)
         {
-            _level += level;
+            _level += change;
             int newLevel = _level;
 
-            _callback?.Invoke(level, newLevel);
+            _callback?.Invoke(change, newLevel);
         }
     }
 }
