@@ -99,7 +99,26 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Update="Properties\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Properties\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-      <Exec Command="cd D:\Lethal_Modding\NetcodePatcher-2.1.0&#xD;&#xA;NetcodePatcher.dll $(TargetDir) deps/&#xD;&#xA;&#xD;&#xA;copy /y &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Lethal Company\BepInEx\plugins&quot;&#xD;&#xA;echo &quot;Copied from $(TargetPath).&quot;" />
+      <Exec Command="cd D:\Lethal_Modding\NetcodePatcher-2.1.0&#xD;&#xA;NetcodePatcher.dll $(TargetDir) deps/&#xD;&#xA;&#xD;&#xA;xcopy /y &quot;$(TargetPath)&quot; &quot;D:\SteamLibrary\steamapps\common\Lethal Company\BepInEx\plugins&quot;&#xD;&#xA;echo &quot;Copied from $(TargetPath).&quot;" />
+    </Target>
+
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+      <Exec Command="xcopy &quot;D:\Lethal_Modding\Unity Hud\Hud Creation\Assets\StreamingAssets\skillmenu&quot; &quot;D:\Lethal_Modding\Mod_releases\LethalProgression\LethalProgression&quot; /Y" />
     </Target>
 </Project>

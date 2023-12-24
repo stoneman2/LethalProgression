@@ -17,6 +17,7 @@ using LethalProgression.Skills;
 using LethalProgression.Patches;
 using LethalProgression.Config;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace LethalProgression
 {
@@ -41,7 +42,7 @@ namespace LethalProgression
             var harmony = new Harmony(modGUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
-            skillBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "skillmenu"));
+            skillBundle = AssetBundle.LoadFromMemory(LethalProgression.Properties.Resources.skillmenu);
 
             Log = Logger;
 
