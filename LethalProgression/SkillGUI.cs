@@ -228,13 +228,10 @@ namespace LethalProgression.GUI
         {
             if (skill._teamShared)
                 return;
-            GameObject displayLabel = skillButton.transform.GetChild(0).gameObject;
-            displayLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetShortName());
-
             GameObject bonusLabel = skillButton.transform.GetChild(1).gameObject;
             bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
             GameObject attributeLabel = skillButton.transform.GetChild(2).gameObject;
-            attributeLabel.GetComponent<TextMeshProUGUI>().SetText($"(+{skill.GetLevel() * skill.GetMultiplier()}%  + {skill.GetAttribute()})");
+            attributeLabel.GetComponent<TextMeshProUGUI>().SetText($"(+{skill.GetLevel() * skill.GetMultiplier()}% {skill.GetAttribute()})");
 
             skillButton.GetComponentInChildren<TextMeshProUGUI>().SetText($"{skill.GetShortName()}:");
         }
@@ -361,13 +358,16 @@ namespace LethalProgression.GUI
                 {
                     Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value];
                     LoadSkillData(skill, button);
+
                     GameObject displayLabel = button.transform.GetChild(0).gameObject;
                     displayLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetShortName());
+
                     GameObject bonusLabel = button.transform.GetChild(1).gameObject;
-                    bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
-                    button.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
+                    bonusLabel.GetComponent<TextMeshProUGUI>().SetText($"{skill.GetLevel()}");
+                    button.GetComponentInChildren<TextMeshProUGUI>().SetText($"{skill.GetShortName()}:");
+
                     GameObject attributeLabel = button.transform.GetChild(2).gameObject;
-                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + LP_NetworkManager.xpInstance.teamLootValue.Value + "% " + skill.GetAttribute() + ")");
+                    attributeLabel.GetComponent<TextMeshProUGUI>().SetText($"(+{LP_NetworkManager.xpInstance.teamLootValue.Value}% {skill.GetAttribute()})");
                     LethalPlugin.Log.LogInfo($"Setting team value hud to {LP_NetworkManager.xpInstance.teamLootValue.Value}");
                 }
             }
