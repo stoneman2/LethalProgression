@@ -1,9 +1,14 @@
-﻿using GameNetcodeStuff;
-using HarmonyLib;
-using LethalProgression.GUI;
-using LethalProgression.Saving;
+﻿using HarmonyLib;
 using LethalProgression.Skills;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+using Unity.Netcode;
+using LethalProgression.GUI;
 using Steamworks;
+using GameNetcodeStuff;
+using LethalProgression.Saving;
 
 namespace LethalProgression.Patches
 {
@@ -42,7 +47,7 @@ namespace LethalProgression.Patches
             }
 
             SprintSpeed.sprintSpeed = 2.25f;
-            //HandSlots.currentSlotCount = 4;
+            HandSlots.currentSlotCount = 4;
 
             GUIUpdate.isMenuOpen = false;
         }

@@ -1,11 +1,16 @@
-﻿using System.Collections.Generic;
-using HarmonyLib;
-using LethalProgression.Config;
+﻿using HarmonyLib;
 using LethalProgression.Skills;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using LethalProgression.Patches;
+using LethalProgression.Config;
 
 namespace LethalProgression.GUI
 {
@@ -64,30 +69,7 @@ namespace LethalProgression.GUI
             }
 
             // Get mouse position.
-            Vector2 mousePos = Mouse.current.position.ReadValue();
-            // If the mouse is currently on the PointsPanel
-            GameObject pointsPanel = guiInstance.mainPanel.transform.GetChild(2).gameObject;
-            var obj = pointsPanel.transform.GetChild(2).gameObject;
-            float xLeast = pointsPanel.transform.position.x - pointsPanel.GetComponent<RectTransform>().rect.width;
-            float xMost = pointsPanel.transform.position.x + pointsPanel.GetComponent<RectTransform>().rect.width;
-            float yLeast = pointsPanel.transform.position.y - pointsPanel.GetComponent<RectTransform>().rect.height;
-            float yMost = pointsPanel.transform.position.y + pointsPanel.GetComponent<RectTransform>().rect.height;
-            if (mousePos.x >= xLeast && mousePos.x <= xMost)
-            {
-                if (mousePos.y >= yLeast && mousePos.y <= yMost)
-                {
-                    // If the mouse is on the points panel, show the tooltip.
-                    obj.SetActive(true);
-                }
-                else
-                {
-                    obj.gameObject.SetActive(false);
-                }
-            }
-            else
-            {
-                obj.gameObject.SetActive(false);
-            }
+
 
 
             guiInstance.mainPanel.SetActive(true);
@@ -252,9 +234,9 @@ namespace LethalProgression.GUI
             GameObject bonusLabel = skillButton.transform.GetChild(1).gameObject;
             bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
             GameObject attributeLabel = skillButton.transform.GetChild(2).gameObject;
-            attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + skill.GetLevel() * skill.GetMultiplier() + "% " + skill.GetAttribute() + ")");
+            attributeLabel.GetComponent<TextMeshProUGUI>().SetText($"(+{skill.GetLevel() * skill.GetMultiplier()}%  + {skill.GetAttribute()})");
 
-            skillButton.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
+            skillButton.GetComponentInChildren<TextMeshProUGUI>().SetText($"{skill.GetShortName()}:");
         }
 
         public void UpdateAllStats()
@@ -379,19 +361,15 @@ namespace LethalProgression.GUI
                 {
                     Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value];
                     LoadSkillData(skill, button);
-
                     GameObject displayLabel = button.transform.GetChild(0).gameObject;
                     displayLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetShortName());
-
                     GameObject bonusLabel = button.transform.GetChild(1).gameObject;
                     bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
                     button.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
-
                     GameObject attributeLabel = button.transform.GetChild(2).gameObject;
                     attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(+" + LP_NetworkManager.xpInstance.teamLootValue.Value + "% " + skill.GetAttribute() + ")");
                     LethalPlugin.Log.LogInfo($"Setting team value hud to {LP_NetworkManager.xpInstance.teamLootValue.Value}");
                 }
             }
         }
-    }
 }

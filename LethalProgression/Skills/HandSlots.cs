@@ -1,8 +1,17 @@
-﻿namespace LethalProgression.Skills
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
+using Object = UnityEngine.Object;
+using UnityEngine.UI;
+using UnityEngine.InputSystem.Utilities;
+using GameNetcodeStuff;
+
+namespace LethalProgression.Skills
 {
     internal class HandSlots
     {
-        /*public static int currentSlotCount = 4;
+        public static int currentSlotCount = 4;
         public static void HandSlotsUpdate(int updateValue, int newValue)
         {
             if (LethalPlugin.ReservedSlots)
@@ -143,6 +152,6 @@
                 player.currentlyHeldObjectServer.gameObject.GetComponent<AudioSource>().PlayOneShot(player.currentlyHeldObjectServer.itemProperties.grabSFX, 0.6f);
             }
             return true;
-        }*/
+        }
     }
 }

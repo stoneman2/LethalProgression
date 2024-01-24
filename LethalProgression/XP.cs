@@ -1,13 +1,23 @@
-﻿using System.Collections;
+﻿using HarmonyLib;
+using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Text;
+using Unity.Netcode;
+using Unity.Networking;
+using UnityEngine;
+using System.IO;
+using UnityEngine.SceneManagement;
+using System.Collections;
+using GameNetcodeStuff;
 using LethalProgression.Config;
+using LethalProgression.Skills;
 using LethalProgression.GUI;
 using LethalProgression.Patches;
 using LethalProgression.Saving;
-using LethalProgression.Skills;
 using Newtonsoft.Json;
-using Unity.Netcode;
-using UnityEngine;
+using Steamworks;
+using System.Linq;
 
 namespace LethalProgression
 {
@@ -229,7 +239,6 @@ namespace LethalProgression
         /////////////////////////////////////////////////
 
         // When updates.
-        /*
         [ServerRpc(RequireOwnership = false)]
         public void ServerHandSlots_ServerRpc(ulong playerID, int slotChange)
         {
@@ -322,7 +331,6 @@ namespace LethalProgression
         {
             SetHandSlot(playerID, handSlots);
         }
-        */
         // CONFIGS
         [ServerRpc(RequireOwnership = false)]
         public void PlayerConnect_ServerRpc()
@@ -360,7 +368,7 @@ namespace LethalProgression
 
                 skillPoints = xpLevel.Value + 5;
 
-                //GetEveryoneHandSlots_ServerRpc();
+                GetEveryoneHandSlots_ServerRpc();
 
                 ChangeXPRequirement_ServerRpc();
             }

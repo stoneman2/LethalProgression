@@ -1,7 +1,16 @@
 ﻿using HarmonyLib;
+using BepInEx.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO;
+using System.Xml.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace LethalProgression.Patches
 {
@@ -44,9 +53,9 @@ namespace LethalProgression.Patches
             // XP Text. Values of how much XP you need to level up.
             // XP Level, which is just the level you're on.
             // Profit, which is how much money you've made.
-            _xpText.text = $"{LP_NetworkManager.xpInstance.GetXP()} / {LP_NetworkManager.xpInstance.xpReq.Value}";
-            _xpLevel.text = $"Level: {LP_NetworkManager.xpInstance.GetLevel()}";
-            _profit.text = $"You've made.. {LP_NetworkManager.xpInstance.GetProfit()}$";
+            _xpText.text = LP_NetworkManager.xpInstance.GetXP().ToString() + " / " + LP_NetworkManager.xpInstance.xpReq.Value.ToString();
+            _xpLevel.text = "Level: " + LP_NetworkManager.xpInstance.GetLevel().ToString();
+            _profit.text = "You've made.. " + LP_NetworkManager.xpInstance.GetProfit().ToString() + "$";
             // Set the bar fill
             _xpBarProgress.GetComponent<Image>().fillAmount = LP_NetworkManager.xpInstance.GetXP() / (float)LP_NetworkManager.xpInstance.xpReq.Value;
         }
