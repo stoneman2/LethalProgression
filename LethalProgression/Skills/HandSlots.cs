@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
-using Object = UnityEngine.Object;
-using UnityEngine.UI;
-using UnityEngine.InputSystem.Utilities;
-using GameNetcodeStuff;
-
-namespace LethalProgression.Skills
+﻿namespace LethalProgression.Skills
 {
     internal class HandSlots
     {
-        public static int currentSlotCount = 4;
+        /*public static int currentSlotCount = 4;
         public static void HandSlotsUpdate(int updateValue, int newValue)
         {
             if (LethalPlugin.ReservedSlots)
@@ -112,9 +103,9 @@ namespace LethalProgression.Skills
         public static bool IsItemSwitchPossible(PlayerControllerB player)
         {
             return (double)player.timeSinceSwitchingSlots >= 0.01 &&
-                !player.inTerminalMenu && !player.isGrabbingObjectAnimation 
-                && !player.inSpecialInteractAnimation && !player.throwingObject 
-                && !player.isTypingChat && !player.twoHanded && !player.activatingItem 
+                !player.inTerminalMenu && !player.isGrabbingObjectAnimation
+                && !player.inSpecialInteractAnimation && !player.throwingObject
+                && !player.isTypingChat && !player.twoHanded && !player.activatingItem
                 && !player.jetpackControls && !player.disablingJetpackControls;
         }
 
@@ -152,6 +143,6 @@ namespace LethalProgression.Skills
                 player.currentlyHeldObjectServer.gameObject.GetComponent<AudioSource>().PlayOneShot(player.currentlyHeldObjectServer.itemProperties.grabSFX, 0.6f);
             }
             return true;
-        }
+        }*/
     }
 }

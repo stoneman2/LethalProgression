@@ -1,12 +1,7 @@
-﻿using BepInEx.Configuration;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using LethalProgression.Config;
 using System.Globalization;
+using LethalProgression.Config;
 
 namespace LethalProgression.Skills
 {
@@ -111,7 +106,8 @@ namespace LethalProgression.Skills
 
             if (bool.Parse(SkillConfig.hostConfig["Hand Slots Enabled"]) && !LethalPlugin.ReservedSlots)
             {
-                CreateSkill(UpgradeType.HandSlot,
+                /*
+                 CreateSkill(UpgradeType.HandSlot,
                      "Hand Slot",
                      "The company finally gives you a better belt! Fit more stuff! (One slot every 100%.)",
                      "HND",
@@ -120,6 +116,7 @@ namespace LethalProgression.Skills
                      int.Parse(SkillConfig.hostConfig["Hand Slots Max Level"]),
                      float.Parse(SkillConfig.hostConfig["Hand Slots Multiplier"], CultureInfo.InvariantCulture),
                      HandSlots.HandSlotsUpdate);
+                */
             }
 
             if (bool.Parse(SkillConfig.hostConfig["Loot Value Enabled"]))

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
-using Unity.Netcode;
+﻿using HarmonyLib;
 
 namespace LethalProgression.Skills
 {

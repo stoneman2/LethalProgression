@@ -1,16 +1,11 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using HarmonyLib;
+using LethalProgression.Config;
 using LethalProgression.Skills;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using LethalProgression.Patches;
-using LethalProgression.Config;
 
 namespace LethalProgression.GUI
 {
@@ -349,7 +344,7 @@ namespace LethalProgression.GUI
             foreach (var button in skillButtonsList)
             {
                 if (button.name == skill.GetShortName())
-                LoadSkillData(skill, button);
+                    LoadSkillData(skill, button);
             }
         }
 
