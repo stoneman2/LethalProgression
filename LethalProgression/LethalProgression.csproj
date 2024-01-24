@@ -16,13 +16,13 @@
 
     <ItemGroup>
 	  <Reference Include="0Harmony">
-	    <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>
+	    <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\0Harmony.dll</HintPath>
 	  </Reference>
 	  <Reference Include="Assembly-CSharp">
 	    <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Assembly-CSharp.dll</HintPath>
 	  </Reference>
       <Reference Include="BepInEx">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\BepInEx.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\BepInEx.dll</HintPath>
       </Reference>
       <Reference Include="ClientNetworkTransform">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\ClientNetworkTransform.dll</HintPath>
@@ -31,31 +31,28 @@
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Facepunch.Steamworks.Win64.dll</HintPath>
       </Reference>
       <Reference Include="HarmonyXInterop">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\HarmonyXInterop.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\HarmonyXInterop.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil.Mdb">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.Mdb.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil.Pdb">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.Pdb.dll</HintPath>
       </Reference>
       <Reference Include="Mono.Cecil.Rocks">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\Mono.Cecil.Rocks.dll</HintPath>
       </Reference>
       <Reference Include="MonoMod.RuntimeDetour">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\MonoMod.RuntimeDetour.dll</HintPath>
       </Reference>
       <Reference Include="MonoMod.Utils">
-        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\MonoMod.Utils.dll</HintPath>
+        <HintPath>D:\Program Files (x86)\Games\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\core\MonoMod.Utils.dll</HintPath>
       </Reference>
       <Reference Include="Newtonsoft.Json">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Newtonsoft.Json.dll</HintPath>
-      </Reference>
-      <Reference Include="ReservedItemSlotCore">
-        <HintPath>C:\Users\bergm_69gfgdx\Downloads\FlipMods-ReservedItemSlotCore-1.8.13\ReservedItemSlotCore.dll</HintPath>
       </Reference>
       <Reference Include="Unity.InputSystem">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.InputSystem.dll</HintPath>

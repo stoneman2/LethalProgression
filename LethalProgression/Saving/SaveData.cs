@@ -1,8 +1,5 @@
-﻿using LethalProgression.Skills;
-using Steamworks;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using LethalProgression.Skills;
 
 namespace LethalProgression.Saving
 {

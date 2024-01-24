@@ -33,20 +33,12 @@ namespace LethalProgression.Patches
         [HarmonyPatch(typeof(QuickMenuManager), "Update")]
         private static void XPMenuUpdate(QuickMenuManager __instance)
         {
-            if (!_xpBar || !_xpBarProgress)
+            if (!_xpInfoContainer || !_xpBar || !_xpBarProgress)
                 return;
 
             // If the settings menu or exit game menu is open, we don't want to show the XP bar.
-            if (__instance.mainButtonsPanel.activeSelf)
-            {
-                _xpBar.SetActive(true);
-                _xpBarProgress.SetActive(true);
-            }
-            else
-            {
-                _xpBar.SetActive(false);
-                _xpBarProgress.SetActive(false);
-            }
+            bool activeState = __instance.mainButtonsPanel.activeSelf;
+            _xpInfoContainer.SetActive(activeState);
 
             // Set actual XP:
             // XP Text. Values of how much XP you need to level up.
@@ -63,40 +55,54 @@ namespace LethalProgression.Patches
         {
             GameObject _pauseMenu = GameObject.Find("/Systems/UI/Canvas/QuickMenu");
             GameObject _gameXPText = GameObject.Find("/Systems/UI/Canvas/EndgameStats/LevelUp/Total");
+            //Container => [XpBar => BarProgression], [Profit,Level]
             if (!_xpInfoContainer)
             {
                 _xpInfoContainer = new GameObject("XpInfoContainer");
                 //setlocal pos to be the same as old one
                 _xpInfoContainer.transform.SetParent(_pauseMenu.transform, false);
-
-                ////// Level Text /////
-                _xpLevel = GameObject.Instantiate(_gameXPText).GetComponent<TextMeshProUGUI>();
-                _xpLevel.name = "XPLevel";
-                _xpLevel.alignment = TextAlignmentOptions.Center;
-                _xpLevel.SetText("Level: 0");
-                _xpLevel.transform.SetParent(_xpInfoContainer.transform, false);
-                _xpLevel.color = new Color(1f, 0.6f, 0f, 1f);
-
-                _xpLevel.transform.Translate(-1f, 0.4f, 0f);
-                ///// PROFIT! /////
-                _profit = GameObject.Instantiate(_gameXPText).GetComponent<TextMeshProUGUI>();
-                _profit.name = "XPProfit";
-                _profit.alignment = TextAlignmentOptions.Center;
-                _profit.SetText("You've made.. 0$.");
-                _profit.transform.SetParent(_xpInfoContainer.transform, false);
-                _profit.color = new Color(1f, 0.6f, 0f, 1f);
-                _profit.transform.Translate(-0.8f, 0f, 0f);
+                _xpInfoContainer.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+                _xpInfoContainer.transform.Translate(-1.7f, 0.9f, 0f);
             }
             if (!_xpBar)
             {
                 ////// XP Bar //////
                 GameObject _gameXPBar = GameObject.Find("/Systems/UI/Canvas/EndgameStats/LevelUp/LevelUpBox");
                 _xpBar = GameObject.Instantiate(_gameXPBar);
-                _xpBar.name = "XPBar";
                 _xpBar.transform.SetParent(_xpInfoContainer.transform, false);
+                _xpBar.name = "XPBar";
 
-                _xpBar.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
-                _xpBar.transform.Translate(-2f, 1f, 0f);
+                ////// XP Text //////
+                _xpText = GameObject.Instantiate(_gameXPText).GetComponent<TextMeshProUGUI>();
+                _xpText.transform.SetParent(_xpBar.transform, false);
+                _xpText.transform.Translate(-0.75f, 0.21f, 0f);
+                _xpText.name = "XPText";
+                _xpText.alignment = TextAlignmentOptions.Center;
+                _xpText.SetText("0/1000");
+
+                _xpText.color = new Color(1f, 0.6f, 0f, 1f);
+                ////// Level Text /////
+                _xpLevel = GameObject.Instantiate(_gameXPText).GetComponent<TextMeshProUGUI>();
+                _xpLevel.transform.SetParent(_xpInfoContainer.transform, false);
+                _xpLevel.transform.position = new Vector3(_xpBar.transform.position.x,
+                    _xpBar.transform.position.y, _xpBar.transform.position.z);
+                _xpLevel.transform.Translate(-0.3f, 0.2f, 0f);//x +.7, y -.2
+                _xpLevel.name = "XPLevel";
+                _xpLevel.alignment = TextAlignmentOptions.Center;
+                _xpLevel.SetText("Level: 0");
+                _xpLevel.color = new Color(1f, 0.6f, 0f, 1f);
+                //Level x.7 y.2
+                //Profit x.7 -y.2
+                ///// PROFIT! /////
+                _profit = GameObject.Instantiate(_gameXPText).GetComponent<TextMeshProUGUI>();
+                _profit.transform.SetParent(_xpInfoContainer.transform, false);
+                _profit.transform.position = new Vector3(_xpBar.transform.position.x,
+                    _xpBar.transform.position.y, _xpBar.transform.position.z);
+                _profit.transform.Translate(-0.10f, -0.2f, 0f);//x +.7, y -.2
+                _profit.name = "XPProfit";
+                _profit.alignment = TextAlignmentOptions.Center;
+                _profit.SetText("You've made.. 0$.");
+                _profit.color = new Color(1f, 0.6f, 0f, 1f);
             }
 
             if (!_xpBarProgress)
@@ -104,27 +110,14 @@ namespace LethalProgression.Patches
                 ////// XP Progress //////
                 GameObject _gameXPBarProgress = GameObject.Find("/Systems/UI/Canvas/EndgameStats/LevelUp/LevelUpMeter");
                 _xpBarProgress = GameObject.Instantiate(_gameXPBarProgress);
-                _xpBarProgress.name = "XPBarProgress";
-
                 _xpBarProgress.transform.SetParent(_xpBar.transform, false);
-                _xpBarProgress.GetComponent<Image>().fillAmount = 0f;
                 _xpBarProgress.transform.localScale = new Vector3(0.597f, 5.21f, 1f);
                 _xpBarProgress.transform.Translate(-0.8f, 0.2f, 0f);
                 Vector3 pos = _xpBarProgress.transform.localPosition;
-
-                _xpBarProgress.transform.localPosition = new Vector3(pos.x + 7, pos.y - 3.5f, 0f);
-
-                ////// XP Text //////
-                _xpText = GameObject.Instantiate(_gameXPText).GetComponent<TextMeshProUGUI>();
-                _xpText.name = "XPText";
-                _xpText.alignment = TextAlignmentOptions.Center;
-                _xpText.SetText("0/1000");
-                _xpText.transform.SetParent(_xpBar.transform, false);
-
-                _xpText.color = new Color(1f, 0.6f, 0f, 1f);
-                _xpText.transform.Translate(-0.75f, 0.21f, 0f);
+                _xpBarProgress.transform.localPosition = new Vector3(pos.x + 7f, pos.y - 3.5f, 0f);
+                _xpBarProgress.name = "XPBarProgress";
+                _xpBarProgress.GetComponent<Image>().fillAmount = 0f;
             }
-            _xpInfoContainer.transform.localPosition = _xpBar.transform.localPosition;
         }
         private static GameObject skillTreeButton;
         [HarmonyPostfix]
@@ -146,16 +139,15 @@ namespace LethalProgression.Patches
 
             GameObject MainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
             skillTreeButton.transform.SetParent(MainButtons.transform, false);
-
+            skillTreeButton.transform.position = new Vector3(0.55f + _xpBar.transform.position.x,
+                    1.09f + _xpBar.transform.position.y, _xpBar.transform.position.z);
             skillTreeButton.name = "Skills";
             skillTreeButton.GetComponentInChildren<TextMeshProUGUI>().text = "> Skills";
             Transform form = _xpText.transform;
             skillTreeButton.transform.localPosition = new Vector3(form.position.x, form.position.y,
                 form.position.z);
             // Change the onClick event to our own.
-            skillTreeButton.transform.position += new Vector3(0.55f, 1.1f - 0.01f);
-
-            //yOff = +1.1f, - 0.01f]]']]]]
+            skillTreeButton.transform.position += new Vector3(-0.15f, 1.056f);
             Button.ButtonClickedEvent OnClickEvent = new Button.ButtonClickedEvent();
             OnClickEvent.AddListener(OpenSkillTree);
             skillTreeButton.GetComponent<Button>().onClick = OnClickEvent;

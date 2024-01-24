@@ -25,79 +25,79 @@ namespace LethalProgression.GUI
                 return;
 
             // If the menu is open, activate mainPanel.
-            if (isMenuOpen)
+            if (!isMenuOpen)
             {
+                guiInstance.mainPanel.SetActive(false);
+                return;
+            }
 
-                if (bool.Parse(SkillConfig.hostConfig["Unspec in Ship Only"]) && !bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
-                {
-                    // Check if you are in the ship right now
-                    if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
-                    {
-                        guiInstance.SetUnspec(true);
-                    }
-                    else
-                    {
-                        guiInstance.SetUnspec(false);
-                    }
-                }
 
-                if (bool.Parse(SkillConfig.hostConfig["Unspec in Orbit Only"]))
+            if (bool.Parse(SkillConfig.hostConfig["Unspec in Ship Only"]) && !bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
+            {
+                // Check if you are in the ship right now
+                if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
                 {
-                    // Check if you are in orbit right now
-                    if (StartOfRound.Instance.inShipPhase)
-                    {
-                        guiInstance.SetUnspec(true);
-                    }
-                    else
-                    {
-                        guiInstance.SetUnspec(false);
-                    }
-                }
-
-                if (bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
-                {
-                    guiInstance.SetUnspec(false);
-                }
-
-                // Get mouse position.
-                Vector2 mousePos = Mouse.current.position.ReadValue();
-                // If the mouse is currently on the PointsPanel
-                GameObject pointsPanel = guiInstance.mainPanel.transform.GetChild(2).gameObject;
-                float xLeast = pointsPanel.transform.position.x - pointsPanel.GetComponent<RectTransform>().rect.width;
-                float xMost = pointsPanel.transform.position.x + pointsPanel.GetComponent<RectTransform>().rect.width;
-                float yLeast = pointsPanel.transform.position.y - pointsPanel.GetComponent<RectTransform>().rect.height;
-                float yMost = pointsPanel.transform.position.y + pointsPanel.GetComponent<RectTransform>().rect.height;
-                if (mousePos.x >= xLeast && mousePos.x <= xMost)
-                {
-                    if (mousePos.y >= yLeast && mousePos.y <= yMost)
-                    {
-                        // If the mouse is on the points panel, show the tooltip.
-                        guiInstance.mainPanel.transform.GetChild(2).GetChild(2).gameObject.SetActive(true);
-                    }
-                    else
-                    {
-                        guiInstance.mainPanel.transform.GetChild(2).GetChild(2).gameObject.SetActive(false);
-                    }
+                    guiInstance.SetUnspec(true);
                 }
                 else
                 {
-                    guiInstance.mainPanel.transform.GetChild(2).GetChild(2).gameObject.SetActive(false);
+                    guiInstance.SetUnspec(false);
                 }
+            }
 
+            if (bool.Parse(SkillConfig.hostConfig["Unspec in Orbit Only"]))
+            {
+                // Check if you are in orbit right now
+                if (StartOfRound.Instance.inShipPhase)
+                {
+                    guiInstance.SetUnspec(true);
+                }
+                else
+                {
+                    guiInstance.SetUnspec(false);
+                }
+            }
 
-                guiInstance.mainPanel.SetActive(true);
-                GameObject mainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
-                mainButtons.SetActive(false);
+            if (bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
+            {
+                guiInstance.SetUnspec(false);
+            }
 
-                GameObject playerList = GameObject.Find("Systems/UI/Canvas/QuickMenu/PlayerList");
-                playerList.SetActive(false);
-
-                RealTimeUpdateInfo();
+            // Get mouse position.
+            Vector2 mousePos = Mouse.current.position.ReadValue();
+            // If the mouse is currently on the PointsPanel
+            GameObject pointsPanel = guiInstance.mainPanel.transform.GetChild(2).gameObject;
+            var obj = pointsPanel.transform.GetChild(2).gameObject;
+            float xLeast = pointsPanel.transform.position.x - pointsPanel.GetComponent<RectTransform>().rect.width;
+            float xMost = pointsPanel.transform.position.x + pointsPanel.GetComponent<RectTransform>().rect.width;
+            float yLeast = pointsPanel.transform.position.y - pointsPanel.GetComponent<RectTransform>().rect.height;
+            float yMost = pointsPanel.transform.position.y + pointsPanel.GetComponent<RectTransform>().rect.height;
+            if (mousePos.x >= xLeast && mousePos.x <= xMost)
+            {
+                if (mousePos.y >= yLeast && mousePos.y <= yMost)
+                {
+                    // If the mouse is on the points panel, show the tooltip.
+                    obj.SetActive(true);
+                }
+                else
+                {
+                    obj.gameObject.SetActive(false);
+                }
             }
             else
             {
-                guiInstance.mainPanel.SetActive(false);
+                obj.gameObject.SetActive(false);
             }
+
+
+            guiInstance.mainPanel.SetActive(true);
+            GameObject mainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
+            mainButtons.SetActive(false);
+
+            GameObject playerList = GameObject.Find("Systems/UI/Canvas/QuickMenu/PlayerList");
+            playerList.SetActive(false);
+
+            RealTimeUpdateInfo();
         }
         [HarmonyPostfix]
         [HarmonyPatch(typeof(QuickMenuManager), "CloseQuickMenu")]
