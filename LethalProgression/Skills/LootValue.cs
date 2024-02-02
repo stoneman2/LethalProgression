@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
-using Unity.Netcode;
+﻿using HarmonyLib;
 
 namespace LethalProgression.Skills
 {
@@ -10,14 +6,14 @@ namespace LethalProgression.Skills
     internal class LootValue
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(RoundManager), "SpawnScrapInLevel")]
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnScrapInLevel))]
         private static void AddLootValue()
         {
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            SkillList skillList = LP_NetworkManager.xpInstance.skillList;
+            if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Value))
+            {
                 return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Value))
-                return;
+            }
 
             float scrapValueAdded = (LP_NetworkManager.xpInstance.teamLootValue.Value / 100);
             // Every time, set it to the default value, then add the multiplier.
@@ -28,11 +24,11 @@ namespace LethalProgression.Skills
 
         public static void LootValueUpdate(int change, int newLevel)
         {
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            SkillList skillList = LP_NetworkManager.xpInstance.skillList;
+            if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Value))
+            {
                 return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Value))
-                return;
+            }
 
             LP_NetworkManager.xpInstance.TeamLootValueUpdate(change, newLevel);
         }

@@ -1,22 +1,15 @@
 ﻿using HarmonyLib;
-using BepInEx.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Xml.Linq;
+using LethalProgression.Extensions;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using Object = UnityEngine.Object;
 
 namespace LethalProgression.Patches
 {
     [HarmonyPatch]
     internal class QuickMenuManagerPatch
     {
+        private static GameObject skillTreeButton;
         private static GameObject _xpBar;
         private static GameObject _xpInfoContainer;
         private static GameObject _xpBarProgress;
@@ -24,38 +17,45 @@ namespace LethalProgression.Patches
         private static TextMeshProUGUI _xpLevel;
         private static TextMeshProUGUI _profit;
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(QuickMenuManager), "OpenQuickMenu")]
+        [HarmonyPatch(typeof(QuickMenuManager), nameof(QuickMenuManager.OpenQuickMenu))]
         private static void QuickMenuXPBar(QuickMenuManager __instance)
         {
             // Check if menucontainer is active
             if (!__instance.isMenuOpen)
+            {
                 return;
+            }
 
             if (!_xpBar || !_xpBarProgress)
+            {
                 MakeNewXPBar();
+            }
 
             _xpBar.SetActive(true);
             _xpBarProgress.SetActive(true);
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(QuickMenuManager), "Update")]
+        [HarmonyPatch(typeof(QuickMenuManager), nameof(QuickMenuManager.Update))]
         private static void XPMenuUpdate(QuickMenuManager __instance)
         {
             if (!_xpInfoContainer || !_xpBar || !_xpBarProgress)
+            {
                 return;
+            }
 
             // If the settings menu or exit game menu is open, we don't want to show the XP bar.
             bool activeState = __instance.mainButtonsPanel.activeSelf;
             _xpInfoContainer.SetActive(activeState);
 
+
             // Set actual XP:
             // XP Text. Values of how much XP you need to level up.
             // XP Level, which is just the level you're on.
             // Profit, which is how much money you've made.
-            _xpText.text = LP_NetworkManager.xpInstance.GetXP().ToString() + " / " + LP_NetworkManager.xpInstance.xpReq.Value.ToString();
-            _xpLevel.text = "Level: " + LP_NetworkManager.xpInstance.GetLevel().ToString();
-            _profit.text = "You've made.. " + LP_NetworkManager.xpInstance.GetProfit().ToString() + "$";
+            _xpText.text = $"{LP_NetworkManager.xpInstance.GetXP()} / {LP_NetworkManager.xpInstance.xpReq.Value}";
+            _xpLevel.text = $"Level: {LP_NetworkManager.xpInstance.GetLevel()}";
+            _profit.text = $"You've made.. {LP_NetworkManager.xpInstance.GetProfit().ToString()}$";
             // Set the bar fill
             _xpBarProgress.GetComponent<Image>().fillAmount = LP_NetworkManager.xpInstance.GetXP() / (float)LP_NetworkManager.xpInstance.xpReq.Value;
         }
@@ -128,17 +128,20 @@ namespace LethalProgression.Patches
                 _xpBarProgress.GetComponent<Image>().fillAmount = 0f;
             }
         }
-        private static GameObject skillTreeButton;
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(QuickMenuManager), "OpenQuickMenu")]
+        [HarmonyPatch(typeof(QuickMenuManager), nameof(QuickMenuManager.OpenQuickMenu))]
         private static void SkillTreeAwake(QuickMenuManager __instance)
         {
             // Check if menucontainer is active
             if (!__instance.isMenuOpen)
+            {
                 return;
+            }
 
             if (!skillTreeButton)
+            {
                 MakeSkillTreeButton();
+            }
         }
 
         private static void MakeSkillTreeButton()
@@ -148,13 +151,12 @@ namespace LethalProgression.Patches
 
             GameObject MainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
             skillTreeButton.transform.SetParent(MainButtons.transform, false);
-            skillTreeButton.transform.position = new Vector3(0.55f + _xpBar.transform.position.x,
-                    1.09f + _xpBar.transform.position.y, _xpBar.transform.position.z);
+            Vector3 position = _xpBar.transform.position;
+            skillTreeButton.transform.position = new Vector3(0.55f + position.x, 1.09f + position.y, position.z);
             skillTreeButton.name = "Skills";
             skillTreeButton.GetComponentInChildren<TextMeshProUGUI>().text = "> Skills";
-            Transform form = _xpText.transform;
-            skillTreeButton.transform.localPosition = new Vector3(form.position.x, form.position.y,
-                form.position.z);
+            position = _xpBar.transform.position;
+            skillTreeButton.transform.localPosition = new Vector3(position.x, position.y, position.z);
             // Change the onClick event to our own.
             skillTreeButton.transform.position += new Vector3(-0.15f, 1.056f);
             Button.ButtonClickedEvent OnClickEvent = new Button.ButtonClickedEvent();
@@ -162,18 +164,11 @@ namespace LethalProgression.Patches
             skillTreeButton.GetComponent<Button>().onClick = OnClickEvent;
 
             //Make the level bar clickable.
-            Button button = _xpBar.GetComponent<Button>();
-            if (button is null)
-            {
-                button = _xpBar.AddComponent<Button>();
-                button.onClick = OnClickEvent;
-            }
-            button = _xpBarProgress.GetComponent<Button>();
-            if (button is null)
-            {
-                button = _xpBarProgress.AddComponent<Button>();
-                button.onClick = OnClickEvent;
-            }
+            Button button = _xpBar.GetOrAddComponent<Button>();
+            button.onClick = OnClickEvent;
+
+            button = _xpBarProgress.GetOrAddComponent<Button>();
+            button.onClick = OnClickEvent;
         }
 
         private static void OpenSkillTree()

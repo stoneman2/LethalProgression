@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
-using BepInEx.Configuration;
+﻿using System.Collections.Generic;
 
 namespace LethalProgression.Config
 {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GameNetcodeStuff;
-using HarmonyLib;
+﻿using GameNetcodeStuff;
 
 namespace LethalProgression.Skills
 {
@@ -11,10 +7,14 @@ namespace LethalProgression.Skills
         public static void JumpHeightUpdate(int updatedValue, int newStamina)
         {
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            {
                 return;
+            }
 
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.JumpHeight))
+            {
                 return;
+            }
 
             Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.JumpHeight];
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;

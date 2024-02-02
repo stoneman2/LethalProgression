@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GameNetcodeStuff;
-using HarmonyLib;
+﻿using GameNetcodeStuff;
 
 namespace LethalProgression.Skills
 {
@@ -10,11 +6,11 @@ namespace LethalProgression.Skills
     {
         public static void StaminaUpdate(int updatedValue, int newStamina)
         {
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            SkillList skillList = LP_NetworkManager.xpInstance.skillList;
+            if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Stamina))
+            {
                 return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Stamina))
-                return;
+            }
 
             Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Stamina];
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;

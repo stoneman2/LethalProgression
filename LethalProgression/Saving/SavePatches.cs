@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using HarmonyLib;
 using LethalProgression.Skills;
 using Newtonsoft.Json;
@@ -12,7 +10,7 @@ namespace LethalProgression.Saving
     {
         // Whenever game saves, do save!
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameNetworkManager), "SaveGame")]
+        [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.SaveGame))]
         private static void SaveGame(GameNetworkManager __instance)
         {
             DoSave();
@@ -20,7 +18,7 @@ namespace LethalProgression.Saving
 
         // Whenever disconnect
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameNetworkManager), "Disconnect")]
+        [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Disconnect))]
         private static void Disconnect(GameNetworkManager __instance)
         {
             DoSave();
@@ -43,7 +41,7 @@ namespace LethalProgression.Saving
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(DeleteFileButton), "DeleteFile")]
+        [HarmonyPatch(typeof(DeleteFileButton), nameof(DeleteFileButton.DeleteFile))]
         private static void DeleteSaveFile(DeleteFileButton __instance)
         {
             SaveManager.DeleteSave(__instance.fileToDelete);

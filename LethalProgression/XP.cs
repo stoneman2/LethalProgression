@@ -1,23 +1,15 @@
-﻿using HarmonyLib;
-using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Unity.Netcode;
-using Unity.Networking;
-using UnityEngine;
-using System.IO;
-using UnityEngine.SceneManagement;
-using System.Collections;
+using System.Linq;
 using GameNetcodeStuff;
 using LethalProgression.Config;
-using LethalProgression.Skills;
 using LethalProgression.GUI;
 using LethalProgression.Patches;
 using LethalProgression.Saving;
+using LethalProgression.Skills;
 using Newtonsoft.Json;
-using Steamworks;
-using System.Linq;
+using Unity.Netcode;
+using UnityEngine;
 
 namespace LethalProgression
 {
@@ -307,10 +299,7 @@ namespace LethalProgression
         [ServerRpc(RequireOwnership = false)]
         public void GetEveryoneHandSlots_ServerRpc()
         {
-            if (LethalPlugin.ReservedSlots)
-                return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
+            if (LethalPlugin.ReservedSlots || !LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
             {
                 return;
             }
@@ -331,6 +320,7 @@ namespace LethalProgression
         {
             SetHandSlot(playerID, handSlots);
         }
+
         // CONFIGS
         [ServerRpc(RequireOwnership = false)]
         public void PlayerConnect_ServerRpc()

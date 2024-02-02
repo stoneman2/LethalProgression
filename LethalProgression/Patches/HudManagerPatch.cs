@@ -1,13 +1,10 @@
-﻿using HarmonyLib;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using HarmonyLib;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+
 
 namespace LethalProgression.Patches
 {
@@ -33,19 +30,14 @@ namespace LethalProgression.Patches
             { "Puffer (EnemyType)", 15 },
         };
 
-        //[HarmonyPostfix]
-        //[HarmonyPatch(typeof(HUDManager), "PingScan_performed")]
-        //private static void DebugScan()
-        //{
-        //    LethalProgression.XPHandler.xpInstance.AddXPServerRPC(10);
-        //}
-
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(HUDManager), "AddNewScrapFoundToDisplay")]
+        [HarmonyPatch(typeof(HUDManager), nameof(HUDManager.AddNewScrapFoundToDisplay))]
         private static void GiveXPForScrap(GrabbableObject GObject)
         {
             if (!GameNetworkManager.Instance.isHostingGame)
+            {
                 return;
+            }
 
             // Now we got the loot list that's about to be displayed, we add XP for each one that gets shown.
             int scrapCost = GObject.scrapValue;
@@ -54,11 +46,11 @@ namespace LethalProgression.Patches
             LP_NetworkManager.xpInstance.AddXPServerRPC(scrapCost);
         }
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(EnemyAI), "KillEnemy")]
+        [HarmonyPatch(typeof(EnemyAI), nameof(EnemyAI.KillEnemy))]
         private static void GiveXPForKill(EnemyAI __instance)
         {
             string enemyType = __instance.enemyType.ToString();
-            LethalPlugin.Log.LogInfo("Enemy type: " + enemyType);
+            LethalPlugin.Log.LogInfo($"Enemy type: {enemyType}");
             // Give XP for the amount of money this scrap costs.
             int enemyReward = 30;
             if (_enemyReward.ContainsKey(enemyType))
@@ -71,12 +63,14 @@ namespace LethalProgression.Patches
         {
             // Makes one if it doesn't exist on screen yet.
             if (!_tempBar)
+            {
                 MakeBar();
+            }
 
             GameObject _tempprogress = GameObject.Find("/Systems/UI/Canvas/IngamePlayerHUD/BottomMiddle/XPUpdate/XPBarProgress");
 
             _tempprogress.GetComponent<Image>().fillAmount = newXP / (float)LP_NetworkManager.xpInstance.GetXPRequirement();
-            _tempText.text = newXP + " / " + (float)LP_NetworkManager.xpInstance.GetXPRequirement();
+            _tempText.text = $"{newXP} / {(float)LP_NetworkManager.xpInstance.GetXPRequirement()}";
 
             _tempBarTime = 2f;
 
@@ -101,12 +95,17 @@ namespace LethalProgression.Patches
         public static void ShowLevelUp()
         {
             if (!levelText)
+            {
                 MakeLevelUp();
+            }
 
             levelTextTime = 5f;
 
-            if (!levelText.gameObject.activeSelf)
-                GameNetworkManager.Instance.StartCoroutine(LevelUpCoroutine());
+            if (levelText.gameObject.activeSelf)
+            {
+                return;
+            }
+            GameNetworkManager.Instance.StartCoroutine(LevelUpCoroutine());
         }
 
         public static void MakeLevelUp()
@@ -133,9 +132,8 @@ namespace LethalProgression.Patches
 
         private static void MakeBar()
         {
-            GameObject _xpBar = GameObject.Find("/Systems/UI/Canvas/QuickMenu/XPBar");
             QuickMenuManagerPatch.MakeNewXPBar();
-            _xpBar = GameObject.Find("/Systems/UI/Canvas/QuickMenu/XPBar");
+            GameObject _xpBar = GameObject.Find("/Systems/UI/Canvas/QuickMenu/XPBar");
             _tempBar = GameObject.Instantiate(_xpBar);
             _tempBar.name = "XPUpdate";
 

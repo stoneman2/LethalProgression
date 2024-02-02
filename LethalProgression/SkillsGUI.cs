@@ -1,102 +1,12 @@
-﻿using HarmonyLib;
+﻿using System.Collections.Generic;
+using LethalProgression.Config;
 using LethalProgression.Skills;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using LethalProgression.Patches;
-using LethalProgression.Config;
 
 namespace LethalProgression.GUI
 {
-    [HarmonyPatch]
-    internal class GUIUpdate
-    {
-        public static bool isMenuOpen = false;
-        public static SkillsGUI guiInstance;
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(QuickMenuManager), "Update")]
-        private static void SkillMenuUpdate(QuickMenuManager __instance)
-        {
-            if (guiInstance == null)
-                return;
-
-            if (!guiInstance.mainPanel)
-                return;
-
-            // If the menu is open, activate mainPanel.
-            if (!isMenuOpen)
-            {
-                guiInstance.mainPanel.SetActive(false);
-                return;
-            }
-
-
-            if (bool.Parse(SkillConfig.hostConfig["Unspec in Ship Only"]) && !bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
-            {
-                // Check if you are in the ship right now
-                if (GameNetworkManager.Instance.localPlayerController.isInHangarShipRoom)
-                {
-                    guiInstance.SetUnspec(true);
-                }
-                else
-                {
-                    guiInstance.SetUnspec(false);
-                }
-            }
-
-            if (bool.Parse(SkillConfig.hostConfig["Unspec in Orbit Only"]))
-            {
-                // Check if you are in orbit right now
-                if (StartOfRound.Instance.inShipPhase)
-                {
-                    guiInstance.SetUnspec(true);
-                }
-                else
-                {
-                    guiInstance.SetUnspec(false);
-                }
-            }
-
-            if (bool.Parse(SkillConfig.hostConfig["Disable Unspec"]))
-            {
-                guiInstance.SetUnspec(false);
-            }
-
-            // Get mouse position.
-
-
-
-            guiInstance.mainPanel.SetActive(true);
-            GameObject mainButtons = GameObject.Find("Systems/UI/Canvas/QuickMenu/MainButtons");
-            mainButtons.SetActive(false);
-
-            GameObject playerList = GameObject.Find("Systems/UI/Canvas/QuickMenu/PlayerList");
-            playerList.SetActive(false);
-
-            RealTimeUpdateInfo();
-        }
-        [HarmonyPostfix]
-        [HarmonyPatch(typeof(QuickMenuManager), "CloseQuickMenu")]
-        private static void SkillMenuClose(QuickMenuManager __instance)
-        {
-            isMenuOpen = false;
-        }
-
-        private static void RealTimeUpdateInfo()
-        {
-            GameObject tempObj = guiInstance.mainPanel.transform.GetChild(2).gameObject;
-            tempObj = tempObj.transform.GetChild(1).gameObject;
-
-            TextMeshProUGUI points = tempObj.GetComponent<TextMeshProUGUI>();
-            points.text = LP_NetworkManager.xpInstance.GetSkillPoints().ToString();
-        }
-    }
     internal class SkillsGUI
     {
         public GameObject mainPanel;
@@ -140,7 +50,7 @@ namespace LethalProgression.GUI
 
             if (LP_NetworkManager.xpInstance.skillList.skills == null)
             {
-                //LethalPlugin.Log.LogInfo("Skill list is null!");
+                LethalPlugin.Log.LogInfo("Skill list is null!");
                 return;
             }
 
@@ -213,9 +123,9 @@ namespace LethalProgression.GUI
             GameObject bonusLabel = button.transform.GetChild(1).gameObject;
             bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
             GameObject attributeLabel = button.transform.GetChild(2).gameObject;
-            attributeLabel.GetComponent<TextMeshProUGUI>().SetText("(" + skill.GetLevel() + " " + skill.GetAttribute() + ")");
+            attributeLabel.GetComponent<TextMeshProUGUI>().SetText($"({skill.GetLevel()} {skill.GetAttribute()})");
 
-            button.GetComponentInChildren<TextMeshProUGUI>().SetText(skill.GetShortName() + ":");
+            button.GetComponentInChildren<TextMeshProUGUI>().SetText($"{skill.GetShortName()}:");
 
             button.SetActive(true);
 
@@ -227,7 +137,12 @@ namespace LethalProgression.GUI
         public void LoadSkillData(Skill skill, GameObject skillButton)
         {
             if (skill._teamShared)
+            {
                 return;
+            }
+            GameObject displayLabel = skillButton.transform.GetChild(0).gameObject;
+            displayLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetShortName());
+
             GameObject bonusLabel = skillButton.transform.GetChild(1).gameObject;
             bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
             GameObject attributeLabel = skillButton.transform.GetChild(2).gameObject;
@@ -241,7 +156,9 @@ namespace LethalProgression.GUI
             foreach (KeyValuePair<UpgradeType, Skill> skill in LP_NetworkManager.xpInstance.skillList.skills)
             {
                 if (skill.Value._teamShared)
+                {
                     continue;
+                }
                 GameObject skillButton = skillButtonsList.Find(x => x.name == skill.Value.GetShortName());
                 LoadSkillData(skill.Value, skillButton);
             }
@@ -250,7 +167,9 @@ namespace LethalProgression.GUI
         public void UpdateStatInfo(Skill skill)
         {
             if (!infoPanel.activeSelf)
+            {
                 infoPanel.SetActive(true);
+            }
 
             TextMeshProUGUI upgradeName = infoPanel.transform.GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
             TextMeshProUGUI upgradeAmt = infoPanel.transform.GetChild(1).gameObject.GetComponent<TextMeshProUGUI>();
@@ -323,14 +242,18 @@ namespace LethalProgression.GUI
             foreach (var button in skillButtonsList)
             {
                 if (button.name == skill.GetShortName())
+                {
                     LoadSkillData(skill, button);
+                }
             }
         }
 
         public void RemoveSkillPoint(LethalProgression.Skills.Skill skill, int amt)
         {
             if (skill.GetLevel() == 0)
+            {
                 return;
+            }
 
             int allocatedPoints = skill.GetLevel();
             if (allocatedPoints < amt)
@@ -345,7 +268,9 @@ namespace LethalProgression.GUI
             foreach (var button in skillButtonsList)
             {
                 if (button.name == skill.GetShortName())
+                {
                     LoadSkillData(skill, button);
+                }
             }
         }
 
@@ -363,7 +288,7 @@ namespace LethalProgression.GUI
                     displayLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetShortName());
 
                     GameObject bonusLabel = button.transform.GetChild(1).gameObject;
-                    bonusLabel.GetComponent<TextMeshProUGUI>().SetText($"{skill.GetLevel()}");
+                    bonusLabel.GetComponent<TextMeshProUGUI>().SetText(skill.GetLevel().ToString());
                     button.GetComponentInChildren<TextMeshProUGUI>().SetText($"{skill.GetShortName()}:");
 
                     GameObject attributeLabel = button.transform.GetChild(2).gameObject;
@@ -372,4 +297,5 @@ namespace LethalProgression.GUI
                 }
             }
         }
+    }
 }
