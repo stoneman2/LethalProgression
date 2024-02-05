@@ -1,82 +1,74 @@
-﻿using System.IO;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Steamworks;
 using UnityEngine;
 
 namespace LethalProgression.Saving
 {
     internal static class SaveManager
     {
-        public static int saveFileSlot = 0;
+        public static ulong steamid;
+        public static int saveFileSlot;
+        private static int GetSaveSlot()
+        {
+            return GameNetworkManager.Instance.saveFileNum + 1;
+        }
+        public static string GetSaveKey(ulong? steamid = null, int saveFileSlot = -1)
+        {
+            if (saveFileSlot == -1)
+            {
+                saveFileSlot = GetSaveSlot();
+            }
+            steamid = steamid.GetValueOrDefault(SteamClient.SteamId);
+            return $"{steamid}/LCSaveFile{saveFileSlot}";
+        }
+        public static string GetSharedSaveKey(ulong? steamid = null, int saveFileSlot = -1)
+        {
+            if (saveFileSlot == -1)
+            {
+                saveFileSlot = GetSaveSlot();
+            }
+            steamid = steamid.GetValueOrDefault(SteamClient.SteamId);
+            return $"{steamid}/LCSaveFile{saveFileSlot}/SharedData";
+        }
+
         public static void Save(ulong steamid, string data)
         {
-            saveFileSlot = GameNetworkManager.Instance.saveFileNum;
+            int saveFileSlot = GetSaveSlot();
 
-            LethalPlugin.Log.LogInfo($"Saving to slot {saveFileSlot + 1}");
+            LethalPlugin.Log.LogInfo($"Saving to slot {saveFileSlot}");
 
-            // If file doesn't exist, create it
-            if (!Directory.Exists(GetSavePath()))
-            {
-                Directory.CreateDirectory(GetSavePath());
-            }
-
-            File.WriteAllText($"{GetSavePath()}{steamid}.json", data);
+            PlayerPrefs.SetString($"{GetSaveKey(steamid)}", data);
         }
-
         public static void SaveShared(int xp, int level, int quota)
         {
-            saveFileSlot = GameNetworkManager.Instance.saveFileNum;
-
-            LethalPlugin.Log.LogInfo($"Saving to slot {saveFileSlot + 1}");
-
-            // If file doesn't exist, create it
-            if (!Directory.Exists(GetSavePath()))
-            {
-                Directory.CreateDirectory(GetSavePath());
-            }
-
-            File.WriteAllText($"{GetSavePath()}shared.json", JsonConvert.SerializeObject(new SaveSharedData(xp, level, quota)));
+            LethalPlugin.Log.LogInfo($"Saving to slot {GetSaveSlot()}");
+            PlayerPrefs.SetString(GetSaveKey(), JsonConvert.SerializeObject(new SaveSharedData(xp, level, quota)));
         }
 
-        public static void DeleteSave(int _saveFileSlot)
+        public static void DeleteSave(int saveFileSlot)
         {
-            saveFileSlot = _saveFileSlot;
-            // Delete entire folder
-            if (Directory.Exists(GetSavePath()))
+            string key = GetSaveKey(null, saveFileSlot);
+            if (PlayerPrefs.HasKey(key))
             {
-                Directory.Delete($"{Application.persistentDataPath}/lethalprogression/save{saveFileSlot + 1}", true);
+                PlayerPrefs.DeleteKey(key);
             }
         }
 
-        public static string GetSavePath()
+
+        public static string Load(ulong? steamid)
         {
-            return $"{Application.persistentDataPath}/lethalprogression/save{saveFileSlot + 1}/";
-        }
-
-        public static string Load(ulong steamId)
-        {
-            saveFileSlot = GameNetworkManager.Instance.saveFileNum;
-
-            if (!File.Exists($"{GetSavePath()}{steamId}.json"))
-            {
-                return null;
-            }
-
-            string json = File.ReadAllText($"{GetSavePath()}{steamId}.json");
-
+            string json = PlayerPrefs.GetString(GetSaveKey(steamid.Value));
             return json;
         }
 
         public static SaveSharedData LoadShared()
         {
-            saveFileSlot = GameNetworkManager.Instance.saveFileNum;
-
-            if (!File.Exists($"{GetSavePath()}shared.json"))
+            string json = PlayerPrefs.GetString(GetSharedSaveKey(), null);
+            if (json == null)
             {
-                LethalPlugin.Log.LogInfo("Shared file doesn't exist");
+                LethalPlugin.Log.LogInfo("Shared file doesn't exists");
                 return null;
             }
-
-            string json = File.ReadAllText($"{GetSavePath()}shared.json");
             LethalPlugin.Log.LogInfo("Shared file exists");
             return JsonConvert.DeserializeObject<SaveSharedData>(json);
         }

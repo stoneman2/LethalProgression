@@ -33,7 +33,7 @@ namespace LethalProgression
             LethalPlugin.Log.LogInfo("XP Network Behavior Made!");
             PlayerConnect_ServerRpc();
         }
-        public void LoadSharedData()
+        public void LoadSharedSaveData()
         {
             SaveSharedData sharedData = SaveManager.LoadShared();
 
@@ -350,7 +350,7 @@ namespace LethalProgression
 
                 if (GameNetworkManager.Instance.isHostingGame)
                 {
-                    LoadSharedData();
+                    LoadSharedSaveData();
                 }
 
                 guiObj = new SkillsGUI();
@@ -374,7 +374,7 @@ namespace LethalProgression
 
         // Loading
         [ServerRpc(RequireOwnership = false)]
-        public void RequestSavedData_ServerRpc(ulong steamID)
+        public void RequestSavedData_ServerRpc(ulong? steamID)
         {
             string saveData = SaveManager.Load(steamID);
             SendSavedData_ClientRpc(saveData);
