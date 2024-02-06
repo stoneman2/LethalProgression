@@ -41,9 +41,6 @@
       <Reference Include="HarmonyXInterop">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\HarmonyXInterop.dll</HintPath>
       </Reference>
-      <Reference Include="LCBetterSaves">
-        <HintPath>C:\Program Files (x86)\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\plugins\Pooble-LCBetterSaves\LCBetterSaves.dll</HintPath>
-      </Reference>
       <Reference Include="Mono.Cecil">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\Mono.Cecil.dll</HintPath>
       </Reference>

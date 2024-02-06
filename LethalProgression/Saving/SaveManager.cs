@@ -6,7 +6,9 @@ namespace LethalProgression.Saving
 {
     internal static class SaveManager
     {
+
         public static ulong steamid;
+
         public static int saveFileSlot;
         private static int GetSaveSlot()
         {
@@ -28,13 +30,12 @@ namespace LethalProgression.Saving
                 saveFileSlot = GetSaveSlot();
             }
             steamid = steamid.GetValueOrDefault(SteamClient.SteamId);
-            return $"{steamid}/LCSaveFile{saveFileSlot}/SharedData";
+            return $"LCSaveFile{saveFileSlot}/SharedData";
         }
 
         public static void Save(ulong steamid, string data)
         {
             int saveFileSlot = GetSaveSlot();
-
             LethalPlugin.Log.LogInfo($"Saving to slot {saveFileSlot}");
 
             PlayerPrefs.SetString($"{GetSaveKey(steamid)}", data);
@@ -42,7 +43,7 @@ namespace LethalProgression.Saving
         public static void SaveShared(int xp, int level, int quota)
         {
             LethalPlugin.Log.LogInfo($"Saving to slot {GetSaveSlot()}");
-            PlayerPrefs.SetString(GetSaveKey(), JsonConvert.SerializeObject(new SaveSharedData(xp, level, quota)));
+            PlayerPrefs.SetString(GetSharedSaveKey(), JsonConvert.SerializeObject(new SaveSharedData(xp, level, quota)));
         }
 
         public static void DeleteSave(int saveFileSlot)
@@ -57,12 +58,14 @@ namespace LethalProgression.Saving
 
         public static string Load(ulong? steamid)
         {
+            SaveMigrator.MigrateSaves();
             string json = PlayerPrefs.GetString(GetSaveKey(steamid.Value));
             return json;
         }
 
         public static SaveSharedData LoadShared()
         {
+            SaveMigrator.MigrateSaves();
             string json = PlayerPrefs.GetString(GetSharedSaveKey(), null);
             if (json == null)
             {
