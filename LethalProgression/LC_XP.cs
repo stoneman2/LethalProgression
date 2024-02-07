@@ -69,18 +69,6 @@ namespace LethalProgression
                 skillCheck += skill.Value;
             }
             LethalPlugin.Log.LogInfo(GetXPRequirement().ToString());
-
-            // Sanity check: If skillCheck goes over amount of skill points, reset all skills.
-            //if (skillCheck > skillPoints)
-            //{
-            //    LethalPlugin.Log.LogInfo("Skill check is greater than skill points, resetting skills.");
-            //    foreach (KeyValuePair<UpgradeType, Skill> skill in skillList.skills)
-            //    {
-            //        skill.Value.Reset();
-            //    }
-            //}
-
-            // if the skill check is less than the current level plus five, add the difference
             if ((skillCheck + skillPoints) < xpLevel.Value + 5)
             {
                 LethalPlugin.Log.LogInfo($"Skill check is less than current level, adding {((xpLevel.Value + 5) - (skillCheck + skillPoints))} skill points.");
@@ -366,8 +354,13 @@ namespace LethalProgression
 
         // Saving
         [ServerRpc(RequireOwnership = false)]
-        public void SaveData_ServerRpc(ulong steamID, string saveData)
+        public void SaveData_ServerRpc(ulong steamID, string saveData, SaveType type = SaveType.PlayerPrefs)
         {
+            if (type == SaveType.Json)
+            {
+                SaveMigrator.MigrateSaves();
+                return;
+            }
             SaveManager.Save(steamID, saveData);
             SaveManager.SaveShared(xpPoints.Value, xpLevel.Value, profit.Value);
         }

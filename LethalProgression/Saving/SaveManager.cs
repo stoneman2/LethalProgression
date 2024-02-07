@@ -6,7 +6,6 @@ namespace LethalProgression.Saving
 {
     internal static class SaveManager
     {
-
         public static ulong steamid;
 
         public static int saveFileSlot;
@@ -23,26 +22,31 @@ namespace LethalProgression.Saving
             steamid = steamid.GetValueOrDefault(SteamClient.SteamId);
             return $"{steamid}/LCSaveFile{saveFileSlot}";
         }
-        public static string GetSharedSaveKey(ulong? steamid = null, int saveFileSlot = -1)
+        public static string GetSharedSaveKey(int saveFileSlot = -1)
         {
             if (saveFileSlot == -1)
             {
                 saveFileSlot = GetSaveSlot();
             }
-            steamid = steamid.GetValueOrDefault(SteamClient.SteamId);
             return $"LCSaveFile{saveFileSlot}/SharedData";
         }
 
-        public static void Save(ulong steamid, string data)
+        public static void Save(ulong steamid, string data, int saveFileSlot = -1)
         {
-            int saveFileSlot = GetSaveSlot();
+            if (saveFileSlot == -1)
+            {
+                saveFileSlot = GetSaveSlot();
+            }
             LethalPlugin.Log.LogInfo($"Saving to slot {saveFileSlot}");
-
             PlayerPrefs.SetString($"{GetSaveKey(steamid)}", data);
         }
-        public static void SaveShared(int xp, int level, int quota)
+        public static void SaveShared(int xp, int level, int quota, int saveFileSlot = -1)
         {
-            LethalPlugin.Log.LogInfo($"Saving to slot {GetSaveSlot()}");
+            if (saveFileSlot == -1)
+            {
+                saveFileSlot = GetSaveSlot();
+            }
+            LethalPlugin.Log.LogInfo($"Saving to slot {saveFileSlot}");
             PlayerPrefs.SetString(GetSharedSaveKey(), JsonConvert.SerializeObject(new SaveSharedData(xp, level, quota)));
         }
 
@@ -56,16 +60,18 @@ namespace LethalProgression.Saving
         }
 
 
-        public static string Load(ulong? steamid)
+        public static string Load(ulong? steamid, SaveType type = SaveType.PlayerPrefs)
         {
-            SaveMigrator.MigrateSaves();
+            if (type == SaveType.Json)
+            {
+                return SaveMigrator.Load(steamid);
+            }
             string json = PlayerPrefs.GetString(GetSaveKey(steamid.Value));
             return json;
         }
 
         public static SaveSharedData LoadShared()
         {
-            SaveMigrator.MigrateSaves();
             string json = PlayerPrefs.GetString(GetSharedSaveKey(), null);
             if (json == null)
             {

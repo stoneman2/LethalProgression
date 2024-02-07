@@ -24,7 +24,7 @@ namespace LethalProgression.Saving
             DoSave();
         }
 
-        public static void DoSave()
+        public static void DoSave(SaveType type = SaveType.PlayerPrefs)
         {
             SaveData saveData = new SaveData();
             saveData.steamId = GameNetworkManager.Instance.localPlayerController.playerSteamId;
@@ -37,7 +37,7 @@ namespace LethalProgression.Saving
             }
 
             string data = JsonConvert.SerializeObject(saveData);
-            LP_NetworkManager.xpInstance.SaveData_ServerRpc(GameNetworkManager.Instance.localPlayerController.playerSteamId, data);
+            LP_NetworkManager.xpInstance.SaveData_ServerRpc(saveData.steamId, data, type);
         }
 
         [HarmonyPostfix]

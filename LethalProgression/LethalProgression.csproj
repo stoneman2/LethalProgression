@@ -41,6 +41,9 @@
       <Reference Include="HarmonyXInterop">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\HarmonyXInterop.dll</HintPath>
       </Reference>
+      <Reference Include="LethalConfig">
+        <HintPath>C:\Users\bergm_69gfgdx\AppData\Roaming\r2modmanPlus-local\LethalCompany\profiles\Default\BepInEx\plugins\AinaVT-LethalConfig\LethalConfig\LethalConfig.dll</HintPath>
+      </Reference>
       <Reference Include="Mono.Cecil">
         <HintPath>C:\Program Files (x86)\Steam\steamapps\common\Lethal Company\BepInEx\core\Mono.Cecil.dll</HintPath>
       </Reference>

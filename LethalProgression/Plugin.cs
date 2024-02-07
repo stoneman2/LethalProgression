@@ -23,6 +23,7 @@ namespace LethalProgression
         internal static ManualLogSource Log;
         internal static bool ReservedSlots;
         internal static bool MikesTweaks;
+        internal static bool LethalConfig;
         public static LethalPlugin Instance { get; private set; }
 
         private void Awake()
@@ -63,7 +64,12 @@ namespace LethalProgression
                         }
                     }
                 }
+                if (plugin.Value.Metadata.GUID.IndexOf("lethalconfig") >= 0)
+                {
+                    LethalConfig = true;
+                }
             }
+
 
             // Network patcher!
             var types = Assembly.GetExecutingAssembly().GetTypes();
@@ -83,9 +89,9 @@ namespace LethalProgression
             SkillConfig.InitConfig();
         }
 
-        public void BindConfig<T>(string section, string key, T defaultValue, string description = "")
+        public ConfigEntry<T> BindConfig<T>(string section, string key, T defaultValue, string description = "")
         {
-            Config.Bind(section, key, defaultValue, description);
+            return Config.Bind(section, key, defaultValue, description);
         }
 
         public IDictionary<string, string> GetAllConfigEntries()

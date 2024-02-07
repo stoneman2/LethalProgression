@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Newtonsoft.Json;
+using Steamworks;
 using UnityEngine;
 
 namespace LethalProgression.Saving
@@ -32,38 +33,68 @@ namespace LethalProgression.Saving
     internal static class SaveMigrator
     {
         public static int saveFileSlot = 0;
+        private static readonly int SteamIdLength = $"{(ulong)SteamClient.SteamId}".Length;
+        private static void Delete(string Path, bool IsFile = true)
+        {
+            if (!Config.SkillConfig.DeleteJsonSaves)
+            {
+                return;
+            }
+            if (IsFile)
+            {
+                File.Delete(Path);
+                return;
+            }
+            Directory.Delete(Path);
+        }
         public static void MigrateSaves()
         {
             string folder = GetSavesFolderPath();
             foreach (string saveFolder in Directory.EnumerateDirectories(folder))
             {
-
-                if (!saveFolder.StartsWith("save"))
+                if (!int.TryParse(saveFolder.ToString().Replace("save", string.Empty), out int saveSlot))
                 {
                     continue;
                 }
 
-                foreach (string filePath in Directory.EnumerateFiles(saveFolder))
+                string folderPath = $"{folder}/{saveFolder}";
+                if (!HasSaveFile(folderPath, saveFolder, saveSlot))//brain.exe has stopped working helpme(kil me)
                 {
-                    string json;
-                    if (filePath.EndsWith("shared.json"))
-                    {
-                        json = File.ReadAllText(filePath);
-                        SaveSharedData sharedData = JsonConvert.DeserializeObject<SaveSharedData>(json);
-                        SaveManager.SaveShared(sharedData.xp, sharedData.level, sharedData.quota);
-                        File.Delete(filePath);
-                    }
-                    else
-                    {
-                        json = File.ReadAllText(filePath);
-                        var dir = filePath.Split(('/'));
-                        SaveManager.Save(ulong.Parse(dir[dir.Length - 1]), File.ReadAllText(filePath));
-                        File.Delete(filePath);
-                    }
+                    LethalPlugin.Log.LogWarning($"{saveFolder} is missing the SaveDataFile");
                 }
-                Directory.Delete(saveFolder);
+
+                string sharedFilePath = $"{folderPath}/shared.json";
+                SaveSharedData sharedData = LoadShared(sharedFilePath);
+                switch (sharedData)
+                {
+                    case null:
+                        LethalPlugin.Log.LogWarning($"{saveFolder} is missing the SharedDataSave file");
+                        break;
+                    default:
+                        SaveManager.SaveShared(sharedData.xp, sharedData.level, sharedData.quota, saveSlot);
+                        break;
+                }
+                Delete(sharedFilePath);
+                Delete(saveFolder, false);
             }
-            Directory.Delete(folder);
+            Delete(folder, false);
+        }
+        public static bool HasSaveFile(string folderPath, string saveFolder, int saveSlot)
+        {
+            foreach (string fileName in Directory.EnumerateFiles(saveFolder))
+            {
+                string filePath = $"{folderPath}/{fileName}";
+                if (fileName.Length != SteamIdLength || !ulong.TryParse(fileName, out ulong steamid))
+                {
+                    continue;
+                }
+                string json = Load(steamid, filePath);
+
+                SaveManager.Save(steamid, json, saveSlot);
+                Delete(fileName);
+                return true;
+            }
+            return false;
         }
         public static string GetSavesFolderPath()
         {
@@ -71,34 +102,40 @@ namespace LethalProgression.Saving
         }
         public static string GetSavePath()
         {
-            return $"{Application.persistentDataPath}/lethalprogression/save{saveFileSlot + 1}/";
+            return $"{GetSavesFolderPath()}/save{saveFileSlot + 1}/";
         }
 
-        public static string Load(ulong steamId)
+        public static string Load(ulong? steamId, string json = null)
         {
             saveFileSlot = GameNetworkManager.Instance.saveFileNum;
-
-            if (!File.Exists($"{GetSavePath()}{steamId}.json"))
+            if (json == null)
+            {
+                json = $"{GetSavePath()}{steamId.Value}.json";
+            }
+            if (!File.Exists(json))
             {
                 return null;
             }
 
-            string json = File.ReadAllText($"{GetSavePath()}{steamId}.json");
-
+            json = File.ReadAllText(json);
             return json;
         }
 
-        public static SaveSharedData LoadShared()
+        public static SaveSharedData LoadShared(string json = null)
         {
             saveFileSlot = GameNetworkManager.Instance.saveFileNum;
 
-            if (!File.Exists($"{GetSavePath()}shared.json"))
+            if (json == null)
+            {
+                json = $"{GetSavePath()}shared.json";
+            }
+            if (!File.Exists(json))
             {
                 LethalPlugin.Log.LogInfo("Shared file doesn't exist");
                 return null;
             }
 
-            string json = File.ReadAllText($"{GetSavePath()}shared.json");
+            json = File.ReadAllText(json);
             LethalPlugin.Log.LogInfo("Shared file exists");
             return JsonConvert.DeserializeObject<SaveSharedData>(json);
         }
