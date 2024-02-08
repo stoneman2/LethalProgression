@@ -12,12 +12,12 @@ namespace LethalProgression.Skills
         private readonly int _cost;
         private readonly int _maxLevel;
         private readonly float _multiplier;
-        private readonly Action<int, int> _callback;
+        private readonly Action<int> _callback;
         public bool _teamShared;
         private int _level;
         public Skill(string name, string description, string shortname, string attribute,
             UpgradeType upgradeType, int cost, int maxLevel, float multiplier,
-            Action<int, int> callback = null, bool teamShared = false)
+            Action<int> callback = null, bool teamShared = false)
         {
             _name = name;
             _shortName = shortname;
@@ -84,10 +84,10 @@ namespace LethalProgression.Skills
 
         public void SetLevel(int newLevel)
         {
-            _level = newLevel;
             // level is number of changes
             int changes = newLevel - _level;
-            _callback?.Invoke(changes, newLevel);
+            _level = newLevel;
+            _callback?.Invoke(changes);
         }
 
         public void AddLevel(int change)
@@ -95,7 +95,7 @@ namespace LethalProgression.Skills
             _level += change;
             int newLevel = _level;
 
-            _callback?.Invoke(change, newLevel);
+            _callback?.Invoke(change);
         }
     }
 }

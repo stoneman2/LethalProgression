@@ -9,7 +9,9 @@ namespace LethalProgression.Skills
     {
         public Dictionary<UpgradeType, Skill> skills = new Dictionary<UpgradeType, Skill>();
 
-        public void CreateSkill(UpgradeType upgrade, string name, string description, string shortname, string attribute, int cost, int maxLevel, float multiplier, Action<int, int> callback = null, bool teamShared = false)
+        public void CreateSkill(UpgradeType upgrade, string name, string description, string shortname,
+            string attribute, int cost, int maxLevel, float multiplier,
+            Action<int> callback = null, bool teamShared = false)
         {
             Skill newSkill = new Skill(name, description, shortname, attribute, upgrade, cost, maxLevel, multiplier, callback, teamShared);
             skills.Add(upgrade, newSkill);

@@ -10,7 +10,7 @@ namespace LethalProgression.Skills
     internal class HandSlots
     {
         public static int currentSlotCount = 4;
-        public static void HandSlotsUpdate(int updateValue, int newValue)
+        public static void HandSlotsUpdate(int updateValue)
         {
             if (LethalPlugin.ReservedSlots)
             {

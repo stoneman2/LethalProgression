@@ -37,8 +37,7 @@ namespace LethalProgression.Patches
         {
             if (LP_NetworkManager.xpInstance.skillList.GetSkill(UpgradeType.Value).GetLevel() != 0)
             {
-                int lootLevel = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value].GetLevel();
-                LP_NetworkManager.xpInstance.TeamLootValueUpdate(-lootLevel, 0);
+                LP_NetworkManager.xpInstance.TeamLootValueUpdate(0);
             }
 
             SprintSpeed.sprintSpeed = 2.25f;

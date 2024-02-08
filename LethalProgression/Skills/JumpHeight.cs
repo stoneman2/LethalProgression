@@ -4,7 +4,7 @@ namespace LethalProgression.Skills
 {
     internal class JumpHeight
     {
-        public static void JumpHeightUpdate(int updatedValue, int newStamina)
+        public static void JumpHeightUpdate(int updatedValue)
         {
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
             {
@@ -21,7 +21,7 @@ namespace LethalProgression.Skills
             // 5 is 100%. So if 1 level adds 1% more, then it is 5 * 1.01.
             float addedJump = (updatedValue * skill.GetMultiplier() / 100f) * 5f;
             localPlayer.jumpForce += addedJump;
-            LethalPlugin.Log.LogInfo($"{updatedValue} change, {newStamina} new jump height, Adding {addedJump} resulting in {localPlayer.jumpForce} jump force");
+            LethalPlugin.Log.LogInfo($"{updatedValue} change,  new jump height, Adding {addedJump} resulting in {localPlayer.jumpForce} jump force");
         }
     }
 }

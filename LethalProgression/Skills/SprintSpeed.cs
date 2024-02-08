@@ -10,7 +10,7 @@ namespace LethalProgression.Skills
     public static class SprintSpeed
     {
         public static float sprintSpeed = 2.25f;
-        public static void SprintSpeedUpdate(int updatedValue, int newStamina)
+        public static void SprintSpeedUpdate(int updatedValue)
         {
             SkillList skillList = LP_NetworkManager.xpInstance.skillList;
             if (skillList.IsSkillListValid() || skillList.IsSkillValid(UpgradeType.SprintSpeed))
@@ -22,7 +22,7 @@ namespace LethalProgression.Skills
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
             float addedSpeed = (updatedValue * skill.GetMultiplier() / 100f) * 2.25f;
             sprintSpeed += addedSpeed;
-            LethalPlugin.Log.LogInfo($"{updatedValue} change, {newStamina} new run speed, Adding {addedSpeed} resulting in {sprintSpeed} run speed");
+            LethalPlugin.Log.LogInfo($"{updatedValue} change,  new run speed, Adding {addedSpeed} resulting in {sprintSpeed} run speed");
         }
 
         public static float GetSprintSpeed()

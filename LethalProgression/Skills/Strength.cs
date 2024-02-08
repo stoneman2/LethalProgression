@@ -9,7 +9,7 @@ namespace LethalProgression.Skills
     [HarmonyPatch]
     internal class Strength
     {
-        public static void StrengthUpdate(int change = 0, int newLevel = 0)
+        public static void StrengthUpdate(int change = 0)
         {
             SkillList skillList = LP_NetworkManager.xpInstance.skillList;
             if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Strength)

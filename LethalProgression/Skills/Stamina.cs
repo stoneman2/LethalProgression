@@ -4,7 +4,7 @@ namespace LethalProgression.Skills
 {
     internal class Stamina
     {
-        public static void StaminaUpdate(int updatedValue, int newStamina)
+        public static void StaminaUpdate(int updatedValue)
         {
             SkillList skillList = LP_NetworkManager.xpInstance.skillList;
             if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Stamina))
@@ -17,7 +17,7 @@ namespace LethalProgression.Skills
             // 1 level adds 2% more to 5. So that is equals to 5 * 1.02.
             float addedStamina = (updatedValue * skill.GetMultiplier() / 100f) * 11f;
             localPlayer.sprintTime += addedStamina;
-            LethalPlugin.Log.LogInfo($"{updatedValue} change, {newStamina} new stamina points, Adding {addedStamina} resulting in {localPlayer.sprintTime} stamina");
+            LethalPlugin.Log.LogInfo($"{updatedValue} change,  new jump height, Adding {addedStamina} resulting in {localPlayer.sprintTime} stamina");
         }
     }
 }
