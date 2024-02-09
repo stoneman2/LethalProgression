@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using GameNetcodeStuff;
 using HarmonyLib;
-using GameNetcodeStuff;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,19 +14,19 @@ namespace LethalProgression.Skills
         private static bool inWater = false;
         private static bool canDrown = true;
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerControllerB), "SetFaceUnderwaterClientRpc")]
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.SetFaceUnderwaterClientRpc))]
         private static void EnteredWater(PlayerControllerB __instance)
         {
             inWater = true;
         }
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerControllerB), "SetFaceOutOfWaterClientRpc")]
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.SetFaceOutOfWaterClientRpc))]
         private static void LeftWater(PlayerControllerB __instance)
         {
             inWater = false;
         }
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(PlayerControllerB), "SetFaceUnderwaterFilters")]
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.SetFaceUnderwaterFilters))]
         private static void ShouldDrown(PlayerControllerB __instance)
         {
             if (!canDrown)
@@ -38,15 +35,15 @@ namespace LethalProgression.Skills
             }
         }
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerControllerB), "LateUpdate")]
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.LateUpdate))]
         private static void OxygenUpdate(PlayerControllerB __instance)
         {
+            SkillList skillList = LP_NetworkManager.xpInstance.skillList;
 
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Oxygen))
+            {
                 return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Oxygen))
-                return;
+            }
 
             if (__instance.isPlayerDead)
             {
@@ -57,7 +54,7 @@ namespace LethalProgression.Skills
                 return;
             }
 
-            if (LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Oxygen].GetLevel() == 0)
+            if (skillList.skills[UpgradeType.Oxygen].GetLevel() == 0)
             {
                 if (oxygenBar)
                 {
@@ -72,7 +69,9 @@ namespace LethalProgression.Skills
             }
 
             if (!oxygenBar)
+            {
                 CreateOxygenBar();
+            }
 
             Skill skill = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Oxygen];
             float maxOxygen = skill.GetTrueValue();
@@ -101,7 +100,7 @@ namespace LethalProgression.Skills
                     oxygenTimer -= Time.deltaTime;
                 }
             }
-            if (!inWater)
+            else
             {
                 if (oxygenTimer <= 0f)
                 {

@@ -1,23 +1,15 @@
-﻿using HarmonyLib;
-using System;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-using Unity.Netcode;
-using Unity.Networking;
-using UnityEngine;
-using System.IO;
-using UnityEngine.SceneManagement;
-using System.Collections;
+using System.Linq;
 using GameNetcodeStuff;
 using LethalProgression.Config;
-using LethalProgression.Skills;
 using LethalProgression.GUI;
 using LethalProgression.Patches;
 using LethalProgression.Saving;
+using LethalProgression.Skills;
 using Newtonsoft.Json;
-using Steamworks;
-using System.Linq;
+using Unity.Netcode;
+using UnityEngine;
 
 namespace LethalProgression
 {
@@ -41,7 +33,7 @@ namespace LethalProgression
             LethalPlugin.Log.LogInfo("XP Network Behavior Made!");
             PlayerConnect_ServerRpc();
         }
-        public void LoadSharedData()
+        public void LoadSharedSaveData()
         {
             SaveSharedData sharedData = SaveManager.LoadShared();
 
@@ -77,18 +69,6 @@ namespace LethalProgression
                 skillCheck += skill.Value;
             }
             LethalPlugin.Log.LogInfo(GetXPRequirement().ToString());
-
-            // Sanity check: If skillCheck goes over amount of skill points, reset all skills.
-            //if (skillCheck > skillPoints)
-            //{
-            //    LethalPlugin.Log.LogInfo("Skill check is greater than skill points, resetting skills.");
-            //    foreach (KeyValuePair<UpgradeType, Skill> skill in skillList.skills)
-            //    {
-            //        skill.Value.Reset();
-            //    }
-            //}
-
-            // if the skill check is less than the current level plus five, add the difference
             if ((skillCheck + skillPoints) < xpLevel.Value + 5)
             {
                 LethalPlugin.Log.LogInfo($"Skill check is less than current level, adding {((xpLevel.Value + 5) - (skillCheck + skillPoints))} skill points.");
@@ -220,7 +200,7 @@ namespace LethalProgression
         /////////////////////////////////////////////////
         /// Team Loot Upgrade Sync
         /////////////////////////////////////////////////
-        public void TeamLootValueUpdate(float update, int newValue)
+        public void TeamLootValueUpdate(float update)
         {
             TeamLootValueUpdate_ServerRpc(update);
         }
@@ -229,8 +209,13 @@ namespace LethalProgression
         public void TeamLootValueUpdate_ServerRpc(float updatedValue)
         {
             float mult = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value].GetMultiplier();
-            float newvalue = updatedValue * mult;
-            teamLootValue.Value += newvalue;
+            float value = updatedValue * mult;
+
+            teamLootValue.Value += value;
+            if (value == 0)
+            {
+                teamLootValue.Value = value;
+            }
             LethalPlugin.Log.LogInfo($"Changed team loot value by {updatedValue * mult} turning into {teamLootValue.Value}.");
         }
 
@@ -307,10 +292,7 @@ namespace LethalProgression
         [ServerRpc(RequireOwnership = false)]
         public void GetEveryoneHandSlots_ServerRpc()
         {
-            if (LethalPlugin.ReservedSlots)
-                return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
+            if (LethalPlugin.ReservedSlots || !LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
             {
                 return;
             }
@@ -361,7 +343,7 @@ namespace LethalProgression
 
                 if (GameNetworkManager.Instance.isHostingGame)
                 {
-                    LoadSharedData();
+                    LoadSharedSaveData();
                 }
 
                 guiObj = new SkillsGUI();
@@ -376,16 +358,21 @@ namespace LethalProgression
         }
 
         // Saving
-        [ServerRpc (RequireOwnership = false)]
-        public void SaveData_ServerRpc(ulong steamID, string saveData)
+        [ServerRpc(RequireOwnership = false)]
+        public void SaveData_ServerRpc(ulong steamID, string saveData, SaveType type = SaveType.PlayerPrefs)
         {
+            if (type == SaveType.Json)
+            {
+                SaveMigrator.MigrateSaves();
+                return;
+            }
             SaveManager.Save(steamID, saveData);
             SaveManager.SaveShared(xpPoints.Value, xpLevel.Value, profit.Value);
         }
 
         // Loading
         [ServerRpc(RequireOwnership = false)]
-        public void RequestSavedData_ServerRpc(ulong steamID)
+        public void RequestSavedData_ServerRpc(ulong? steamID)
         {
             string saveData = SaveManager.Load(steamID);
             SendSavedData_ClientRpc(saveData);

@@ -1,45 +1,36 @@
-﻿using BepInEx;
-using UnityEngine;
-using HarmonyLib;
-using BepInEx.Configuration;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BepInEx.Logging;
 using System.Reflection;
-using System.IO;
-using UnityEngine.SceneManagement;
+using BepInEx;
 using BepInEx.Bootstrap;
-using LethalProgression.GUI;
-using LethalProgression.Skills;
-using LethalProgression.Patches;
+using BepInEx.Configuration;
+using BepInEx.Logging;
+using HarmonyLib;
 using LethalProgression.Config;
-using Unity.Netcode;
 using UnityEngine;
 
 namespace LethalProgression
 {
-    [BepInPlugin("Stoneman.LethalProgression", "Lethal Progression", "1.4.0")]
+    [BepInPlugin(modGUID, modName, modVersion)]
     internal class LethalPlugin : BaseUnityPlugin
     {
         private const string modGUID = "Stoneman.LethalProgression";
         private const string modName = "Lethal Progression";
-        private const string modVersion = "1.4.0";
+        private const string modVersion = "1.4.1";
         private const string modAuthor = "Stoneman";
         public static AssetBundle skillBundle;
 
         internal static ManualLogSource Log;
         internal static bool ReservedSlots;
         internal static bool MikesTweaks;
+        internal static bool LethalConfig;
         public static LethalPlugin Instance { get; private set; }
 
         private void Awake()
         {
             Instance = this;
 
-            var harmony = new Harmony(modGUID);
+            Harmony harmony = new Harmony(modGUID);
             harmony.PatchAll(Assembly.GetExecutingAssembly());
 
             skillBundle = AssetBundle.LoadFromMemory(LethalProgression.Properties.Resources.skillmenu);
@@ -73,7 +64,12 @@ namespace LethalProgression
                         }
                     }
                 }
+                if (plugin.Value.Metadata.GUID.IndexOf("lethalconfig") >= 0)
+                {
+                    LethalConfig = true;
+                }
             }
+
 
             // Network patcher!
             var types = Assembly.GetExecutingAssembly().GetTypes();
@@ -93,13 +89,9 @@ namespace LethalProgression
             SkillConfig.InitConfig();
         }
 
-        public void BindConfig<T>(string section, string key, T defaultValue, string description = "")
+        public ConfigEntry<T> BindConfig<T>(string section, string key, T defaultValue, string description = "")
         {
-            Config.Bind(section,
-                key,
-                defaultValue,
-                description
-            );
+            return Config.Bind(section, key, defaultValue, description);
         }
 
         public IDictionary<string, string> GetAllConfigEntries()

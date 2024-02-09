@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
+﻿using HarmonyLib;
 
 namespace LethalProgression.Skills
 {
@@ -9,17 +6,23 @@ namespace LethalProgression.Skills
     internal class BatteryLife
     {
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(GrabbableObject), "SyncBatteryServerRpc")]
+        [HarmonyPatch(typeof(GrabbableObject), nameof(GrabbableObject.SyncBatteryServerRpc))]
         public static void BatteryUpdate(ref int charge)
         {
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            {
                 return;
+            }
 
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Battery))
+            {
                 return;
+            }
 
             if (charge == 100)
+            {
                 charge += (int)LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Battery].GetTrueValue();
+            }
         }
     }
 }
