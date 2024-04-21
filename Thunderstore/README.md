@@ -1,6 +1,8 @@
 # Lethal Progression
 - Expand the experience system by adding numbered levels, XP points, and spendable skillpoints, with full stat upgrades.
-
+## this is just a quick fix to the mod untill stoneman fixes it/accepts my pull request.
+i am not going to be maintaining this mod
+this will be deleted when the offical mod is updated
 # !!!!EVERYONE needs this mod for it to work!!!!
 
 #### Upgrades! (In your pause menu).

@@ -1,0 +1,9 @@
+{
+  "name": "LethalProgressionPatch",
+  "version_number": "1.4.0",
+  "website_url": "https://github.com/CatsArmy/LethalProgression",
+  "description": "Leveling and skillpoints! temp patch untill offical update",
+  "dependencies": [
+    "BepInEx-BepInExPack-5.4.2100"
+  ]
+}

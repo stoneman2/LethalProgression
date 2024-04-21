@@ -1,27 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
-using Object = UnityEngine.Object;
-using UnityEngine.UI;
-using UnityEngine.InputSystem.Utilities;
 using GameNetcodeStuff;
+using UnityEngine;
+using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace LethalProgression.Skills
 {
     internal class HandSlots
     {
         public static int currentSlotCount = 4;
-        public static void HandSlotsUpdate(int updateValue, int newValue)
+        public static void HandSlotsUpdate(int updateValue)
         {
             if (LethalPlugin.ReservedSlots)
+            {
                 return;
+            }
 
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            {
                 return;
+            }
 
             if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.HandSlot))
+            {
                 return;
+            }
 
             LC_XP xpInstance = LP_NetworkManager.xpInstance;
 
@@ -48,7 +52,9 @@ namespace LethalProgression.Skills
             {
                 Transform child = inventory.transform.GetChild(i);
                 if (slotIgnore.Contains(child.gameObject.name))
+                {
                     continue;
+                }
 
                 Object.Destroy(child.gameObject);
             }
@@ -91,8 +97,8 @@ namespace LethalProgression.Skills
                                                             CurrentSlot.transform.localRotation);
                 CurrentSlot = NewSlot;
 
-                ItemSlotIconFrames[3 + (i + 1)] = NewSlot.GetComponent<Image>();
-                ItemSlotIcons[3 + (i + 1)] = NewSlot.transform.GetChild(0).GetComponent<Image>();
+                ItemSlotIconFrames[4 + i] = NewSlot.GetComponent<Image>();
+                ItemSlotIcons[4 + i] = NewSlot.transform.GetChild(0).GetComponent<Image>();
                 NewSlot.SetActive(true);
             }
 
@@ -112,9 +118,9 @@ namespace LethalProgression.Skills
         public static bool IsItemSwitchPossible(PlayerControllerB player)
         {
             return (double)player.timeSinceSwitchingSlots >= 0.01 &&
-                !player.inTerminalMenu && !player.isGrabbingObjectAnimation 
-                && !player.inSpecialInteractAnimation && !player.throwingObject 
-                && !player.isTypingChat && !player.twoHanded && !player.activatingItem 
+                !player.inTerminalMenu && !player.isGrabbingObjectAnimation
+                && !player.inSpecialInteractAnimation && !player.throwingObject
+                && !player.isTypingChat && !player.twoHanded && !player.activatingItem
                 && !player.jetpackControls && !player.disablingJetpackControls;
         }
 

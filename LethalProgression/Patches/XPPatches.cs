@@ -1,14 +1,9 @@
-﻿using HarmonyLib;
-using LethalProgression.Skills;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
-using Unity.Netcode;
+﻿using GameNetcodeStuff;
+using HarmonyLib;
 using LethalProgression.GUI;
-using Steamworks;
-using GameNetcodeStuff;
 using LethalProgression.Saving;
+using LethalProgression.Skills;
+using Steamworks;
 
 namespace LethalProgression.Patches
 {
@@ -16,7 +11,7 @@ namespace LethalProgression.Patches
     internal class XPPatches
     {
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(StartOfRound), "FirePlayersAfterDeadlineClientRpc")]
+        [HarmonyPatch(typeof(StartOfRound), nameof(StartOfRound.FirePlayersAfterDeadlineClientRpc))]
         private static void ResetXPValues(StartOfRound __instance)
         {
             var xpInstance = LP_NetworkManager.xpInstance;
@@ -37,13 +32,12 @@ namespace LethalProgression.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(GameNetworkManager), "Disconnect")]
+        [HarmonyPatch(typeof(GameNetworkManager), nameof(GameNetworkManager.Disconnect))]
         private static void DisconnectXPHandler()
         {
             if (LP_NetworkManager.xpInstance.skillList.GetSkill(UpgradeType.Value).GetLevel() != 0)
             {
-                int lootLevel = LP_NetworkManager.xpInstance.skillList.skills[UpgradeType.Value].GetLevel();
-                LP_NetworkManager.xpInstance.TeamLootValueUpdate(-lootLevel, 0);
+                LP_NetworkManager.xpInstance.TeamLootValueUpdate(0);
             }
 
             SprintSpeed.sprintSpeed = 2.25f;
@@ -53,10 +47,10 @@ namespace LethalProgression.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(PlayerControllerB), "SendNewPlayerValuesClientRpc")]
+        [HarmonyPatch(typeof(PlayerControllerB), nameof(PlayerControllerB.SendNewPlayerValuesClientRpc))]
         private static void PlayerLoadedXPHandler(StartOfRound __instance)
         {
-            ulong steamID = SteamClient.SteamId;
+            ulong? steamID = SteamClient.SteamId;
             LethalPlugin.Log.LogInfo($"Player {steamID} has joined the game.");
             LP_NetworkManager.xpInstance.RequestSavedData_ServerRpc(steamID);
 
@@ -64,7 +58,7 @@ namespace LethalProgression.Patches
         }
 
         [HarmonyPostfix]
-        [HarmonyPatch(typeof(TimeOfDay), "SetNewProfitQuota")]
+        [HarmonyPatch(typeof(TimeOfDay), nameof(TimeOfDay.SetNewProfitQuota))]
         private static void ProfitQuotaUpdate(TimeOfDay __instance)
         {
             if (!GameNetworkManager.Instance.isHostingGame)
