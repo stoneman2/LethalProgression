@@ -1,40 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
-using Unity.Netcode;
+﻿using HarmonyLib;
 
 namespace LethalProgression.Skills
 {
     [HarmonyPatch]
     internal class LootValue
     {
+
+        /// OnSpawnScrap
+        /// UpdateLootValue
+        /// 
+        /// 
         [HarmonyPrefix]
-        [HarmonyPatch(typeof(RoundManager), "SpawnScrapInLevel")]
+        [HarmonyPatch(typeof(RoundManager), nameof(RoundManager.SpawnScrapInLevel))]
         private static void AddLootValue()
         {
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            SkillList skillList = LP_NetworkManager.xpInstance.skillList;
+            if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Value))
+            {
                 return;
-
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Value))
-                return;
+            }
 
             float scrapValueAdded = (LP_NetworkManager.xpInstance.teamLootValue.Value / 100);
-            // Every time, set it to the default value, then add the multiplier.
-            RoundManager.Instance.scrapValueMultiplier = 1f + scrapValueAdded;
-
-            LethalPlugin.Log.LogDebug($"Added {scrapValueAdded} to scrap value multiplier, resulting in {RoundManager.Instance.scrapValueMultiplier}");
+            try
+            {
+                RoundManager.Instance.scrapValueMultiplier += scrapValueAdded;
+            }
+            catch { }
+            LethalPlugin.Log.LogDebug($"Added {scrapValueAdded} to scrap value multiplier, " +
+                $"resulting in {RoundManager.Instance.scrapValueMultiplier}");
         }
 
-        public static void LootValueUpdate(int change, int newLevel)
+        public static void LootValueUpdate(int change)
         {
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillListValid())
+            SkillList skillList = LP_NetworkManager.xpInstance.skillList;
+            if (!skillList.IsSkillListValid() || !skillList.IsSkillValid(UpgradeType.Value))
+            {
                 return;
+            }
 
-            if (!LP_NetworkManager.xpInstance.skillList.IsSkillValid(UpgradeType.Value))
-                return;
-
-            LP_NetworkManager.xpInstance.TeamLootValueUpdate(change, newLevel);
+            LP_NetworkManager.xpInstance.TeamLootValueUpdate(change);
         }
     }
 }

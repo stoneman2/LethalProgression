@@ -1,16 +1,37 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using HarmonyLib;
-using BepInEx.Configuration;
+﻿using System.Collections.Generic;
+using LethalConfig;
+using LethalConfig.ConfigItems;
+using Steamworks;
 
 namespace LethalProgression.Config
 {
     internal class SkillConfig
     {
         public static IDictionary<string, string> hostConfig = new Dictionary<string, string>();
+        public static bool DeleteJsonSaves;
+        public static void LethalConfigButtons()
+        {
+            if (!LethalPlugin.LethalConfig)
+            {
+                return;
+            }
+            string IDesc = "Caution this may override your current save files use carfuly";
+            string ItemName = "Import Saves";
+            var ImportSaves = new GenericButtonConfigItem("Saving", ItemName, IDesc, ItemName, () =>
+            LP_NetworkManager.xpInstance.SaveData_ServerRpc(SteamClient.SteamId, string.Empty, SaveType.Json));
+
+            LethalConfigManager.AddConfigItem(ImportSaves);
+        }
+        private const string Caution = $"\n{nameof(Caution)},This may require a restart to apply";
         public static void InitConfig()
         {
+            LethalConfigButtons();
+            DeleteJsonSaves = LethalPlugin.Instance.BindConfig<bool>(
+                "Saving",
+                "DeleteJsonSavesOnLoad",
+                false,
+                $"Deletes all the old json files and replaces them with the newer saving system{Caution}"
+                ).Value;
             LethalPlugin.Instance.BindConfig<int>(
                 "General",
                 "Person Multiplier",
